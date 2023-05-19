@@ -1,21 +1,21 @@
 #ifndef __TOLLERANZA_H
 #define __TOLLERANZA_H
 
-//dobbiamo sicuramente cambiare il __CONVEXHULL__H sopra e sotto
-
 #include "iostream"
 #include "list"
-//#include "Eigen/Eigen"
-//#include "map"
+
+#include "Eigen/Eigen"
+#include "map"
 //#include "sortingArea.hpp"
 
 
-/* il file sulle tolleranze l'ho preso dall'esercitazione convex hull
+/*
+ * il file sulle tolleranze l'ho preso dall'esercitazione convex hull
  */
 
 using namespace std;
 using namespace Eigen;
-namespace ConvexHullLibrary
+namespace TolleranzaLibrary
 {
 
   constexpr double max_tolerance(const double& x, const double& y)
@@ -81,8 +81,9 @@ namespace ConvexHullLibrary
     return !(p1 > p2);
   }
 
+//FORSE DOVREMMO INSERIRE IL SORTING PER DARGLI UN DEFINIZIONE DI TOLLERANZA NEL CALCOLO DEL <, >,  =, ECC..-
 
- /*non credo che queste funzioni ci servano*/
+  /*non credo che queste funzioni ci servano*/
 
   /*bool UpperLine(const Point& p1,
                  const Point& p2,

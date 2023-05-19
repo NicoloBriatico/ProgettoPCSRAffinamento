@@ -2,6 +2,7 @@
 #include <math.h>
 
 /*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA     */
+//i test vanno costruiti in un progetto a parte che è chiamato raffinamento_test
 
 namespace ShapeLibrary {
 //ci deve essere un metodo show

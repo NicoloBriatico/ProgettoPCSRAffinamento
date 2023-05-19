@@ -76,17 +76,17 @@ int main()
  *
  *teoricamente ci sono due file da testare uno nella cartella Dataset/Test1 e uno in Dataset/Test2
  *
+ *capire se nel file tolleranza.hpp vado incluso e chiamato il file di sorting, perchè teoricamente per tutte le operazioni che includano l'uso di confronti dovremmo applicare le nuove tolleranze
  *
- *
- *
+ *!!! oss: va omologata la lingua per una questione stilistica, quindi se scegliamo di scrivere gli output tutti in inglese vanno fatti tutti in inglese!!
 */
 
 
 /*                                                          PROBLEMI RISOLTI DA SEGNALARE
  *
- *per inserire un file nel Header File o nel Source File, aprire il file CMakeList.txt in src e scrivere list(APPEND raffinamento_headers ${CMAKE_CURRENT_SOURCE_DIR}/empty_class.hpp) sostituendo i nomi dei file scelti;
+ *per inserire un file nel Header File o nel Source File, aprire il file CMakeList.txt in src (in basso) e scrivere list(APPEND raffinamento_headers ${CMAKE_CURRENT_SOURCE_DIR}/empty_class.hpp) sostituendo i nomi dei file scelti;
  *
- *anche i file da leggere vanno inseriti nel cmakelist
+ *anche i file da leggere vanno inseriti nel cmakelist quello in alto
  *
  *
  *

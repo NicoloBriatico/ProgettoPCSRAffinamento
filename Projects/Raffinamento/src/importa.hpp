@@ -49,13 +49,16 @@ bool ImportCell1Ds(TriangularMesh& mesh);
 ///\return the result of the reading, true if is success, false otherwise
 bool ImportCell2Ds(TriangularMesh& mesh);
 
-
+/*
+ * direi che una volta testato il funzionamento di questo file, tutti i cout possano essere commentati
+ * bisogna capire bene cosa si può commentare e cosa no
+ */
 
 
 // ***************************************************************************
 bool ImportMesh(TriangularMesh& mesh)
 {
-  cout<<"siamo dentro la funzione"<<endl;
+  //cout<<"siamo dentro la funzione"<<endl;
 
   if(!ImportCell0Ds(mesh))
   {
@@ -66,11 +69,13 @@ bool ImportMesh(TriangularMesh& mesh)
     cout << "Cell0D marker:" << endl;
     for(auto it = mesh.Cell0DMarkers.begin(); it != mesh.Cell0DMarkers.end(); it++)
     {
+
       cout << "key:\t" << it -> first << "\t values:";
       for(const unsigned int id : it -> second)
         cout << "\t" << id;
 
       cout << endl;
+
     }
   }
 
@@ -121,6 +126,7 @@ bool ImportMesh(TriangularMesh& mesh)
            return 3;
          }
 
+         //qui dovrebbe bastare commentare la riga sotto
          cout << "c: " << c << ", origin: " << *findOrigin << ", end: " << *findEnd << endl;
 
       }

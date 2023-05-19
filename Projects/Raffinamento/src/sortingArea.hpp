@@ -14,6 +14,13 @@
  */
 
 
+/*
+ * per come è implementato questo heapsort prende in input un vettore di dimensione variabile contenente un qualsiasi tipo di funzione (è un templete) e riordina il vettore
+ * dal più piccolo al più grande, qualora si voglia implementare dal più grande al più piccolo bisognerebbe attivare decreasing.
+ * Dato che a noi serve sempre ordinare dal più grande al più piccolo io opterei per ridefinire direttamente l'algoritmo in modo che ordini dal più grande al più piccolo
+*/
+//OSS ho apportato (e segnalato i vari cambi), ma andrebbe testato per garantirne l'effettivo funzionamento!!!
+
 #include "iostream"
 #include "list"
 #include "Eigen/Eigen"
@@ -23,8 +30,9 @@ using namespace std;
 using namespace Eigen;
 
 namespace SortLibrary {
-/*
 
+/*
+//impostazioni per ordinare in senso inverso
   struct DecreasingInt
   {
     int value;
@@ -59,12 +67,8 @@ namespace SortLibrary {
     return obj1.value < obj2.value;
   }
 */
-/*
-  //va scelto il tipo ti sorting
-  template<typename T>
-  vector<T> HeapSort(const vector<T>& v){
-    return v;
-  }
+
+/* PER ORA HO LASCIATO LO HEAPSORT, POI SCEGLIAMO BENE COSA IMPLEMENTARE*/
 
   template<typename T>
   //funzione che scambia gli indici
@@ -96,22 +100,23 @@ namespace SortLibrary {
     if (k + 1 < heapSize)
         k = k + 1;
     //se il nodo k è più grande del nodo j sostituisco j con k
-    if (heapTree[k] > heapTree[j])
+    //HO INVERTITO > CON <
+    if (heapTree[k] < heapTree[j])
         j = k;
+    //HO INVERTITO <= CON <=
     //se il nodo i>=nodo j sostituisco j con i
-    if (heapTree[i] >= heapTree[j])
+    if (heapTree[i] <= heapTree[j])
         j = i;
     //ritorno il nuovo indice
     return j;
   }
 
-*/
-/*
   template<typename T>
   void Riordina(vector<T>& heapTree,const unsigned int& heapSize, unsigned int i) {
     //l'albero che ho in heapTree è tutto ordinato fino alla posizione i-esima
     //scorro finche è verificata la condizione di heap Tree
-    while( i>0 && heapTree[i] > heapTree[Padre(i)]){
+      //HO INVERTITO > CON <
+    while( i>0 && heapTree[i] < heapTree[Padre(i)]){
         //scambio gli indici e aggiorno la i (che ora si è invertita con il padre)
         Scambia(i, Padre(i), heapTree);
         i = Padre(i);
@@ -120,10 +125,9 @@ namespace SortLibrary {
             cout<<heapTree[k]<< ", ";
         }
 
-        cout<<endl;
+        cout<<endl;*/
         }
-*/
-/*
+
     //scorro fino alla fine il vettore e finchè non trovo il migliore dei figli
     while (Sinistro(i) < heapSize && i!= MigliorePadreFigli(i, heapTree, heapSize))
     {
@@ -135,11 +139,10 @@ namespace SortLibrary {
             cout<<heapTree[k]<< ", ";
         }
 
-        cout<<endl;
+        cout<<endl;*/
     }
   }
-*/
-/*
+
 
 
   template<typename T>
@@ -162,7 +165,8 @@ namespace SortLibrary {
             cout<<heapTree[j]<< ", ";
             }
 
-        cout<< endl;
+        cout<< endl;*/
+
         //lo riordino:
         Riordina(heapTree,i, i);
 
@@ -171,7 +175,7 @@ namespace SortLibrary {
             cout<<heapTree[k]<< ", ";
             }
 
-        cout<<endl;
+        cout<<endl;*/
 
     }
     //uscito dal for heapTree è un heapTree
@@ -180,7 +184,7 @@ namespace SortLibrary {
         cout<<heapTree[k]<< ", ";
     }
 
-    cout<<endl;
+    cout<<endl;*/
     while (heapSize != 0)
     {
         //inizializzo il massimo come il primo elemento dell'heap
@@ -205,8 +209,6 @@ namespace SortLibrary {
   }
 
 
-
-*/
 }
 
 

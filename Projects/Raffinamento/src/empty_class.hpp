@@ -14,6 +14,7 @@
  * 3. bisezione;
  *
  * oss: per il calcolo delle aree dovremmo sfruttare le informazioni tratte dal file, conoscendo sia i lati che i punti, forse conviene calcolare l'area come un poligono e quindi implementare solo quel metodo
+ * oss: nell'ottica della lezione del 19/05 potremmo anche pensare di definire 3 classi al posto di 3 metodi, ma va capito anche se ne vale effettivamente la pena
  */
 
 
@@ -33,7 +34,8 @@ namespace ShapeLibrary {
       string Show() {return "Polygon: " + to_string(Area()) ; }
       //double Area(Eigen::MatrixXd& points){ return Area; }
   };
-  //oss: io gestirei alcuni casi particolari tipo triangolo degenere (eg una linea) che poi testiamo e altre cose patologiche
+
+  //oss: io gestirei alcuni casi particolari tipo triangolo degenere (eg una linea) che poi testiamo e altre cose patologiche, posto che vogliamo essere in grado di gestirli
   class Triangle : public Polygon
   {
     private:
