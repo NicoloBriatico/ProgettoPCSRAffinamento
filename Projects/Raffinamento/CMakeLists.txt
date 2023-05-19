@@ -73,6 +73,26 @@ add_executable(raffinamento_program
 	${raffinamento_SOURCES}
     ${raffinamento_HEADERS})
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test1/Cell0Ds.csv
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test1/Cell1Ds.csv
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test1/Cell2Ds.csv
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+##CI SONO DUE FILE DA LEGGERE, MA HANNO GLI STESSI NOMI E SONO IN CARTELLE DIVERSE, DOBBIAMO CAPIRE COME FARE
+# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/raffinamento/Dataset/Test2/Cell0Ds.csv
+#      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/raffinamento/Dataset/Test2/Cell1Ds.csv
+#      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/raffinamento/Dataset/Test2/Cell2Ds.csv
+#      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+
 target_link_libraries(raffinamento_program ${raffinamento_LINKED_LIBRARIES})
 target_include_directories(raffinamento_program PRIVATE ${raffinamento_INCLUDE})
 target_compile_options(raffinamento_program PUBLIC -fPIC)
