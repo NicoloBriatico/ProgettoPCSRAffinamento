@@ -1,6 +1,6 @@
 #ifndef __EMPTY_H
 #define __EMPTY_H
-//dpbbiamo siciramente cambiare nome alla classe
+//dobbiamo sicuramente cambiare nome alla classe
 
 #include <iostream>
 #include "Eigen/Eigen"
