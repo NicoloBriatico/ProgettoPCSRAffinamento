@@ -28,38 +28,26 @@ struct TriangularMesh
     std::vector<array<unsigned int, 3>> Cell2DEdges = {}; ///< Cell2D Cell1D indices, size 1 x NumberCell2DEdges[NumberCell2D]
 };
 
-
-///\brief Import the triangular mesh and test if the mesh is correct
-///\param mesh: a TriangularMesh struct
-///\return the result of the reading, true if is success, false otherwise
 bool ImportMesh(TriangularMesh& mesh);
 
-///\brief Import the Cell0D properties from Cell0Ds.csv file
-///\param mesh: a TriangularMesh struct
-///\return the result of the reading, true if is success, false otherwise
 bool ImportCell0Ds(TriangularMesh& mesh);
 
-///\brief Import the Cell1D properties from Cell1Ds.csv file
-///\param mesh: a TriangularMesh struct
-///\return the result of the reading, true if is success, false otherwise
 bool ImportCell1Ds(TriangularMesh& mesh);
 
-///\brief Import the Cell2D properties from Cell2Ds.csv file
-///\param mesh: a TriangularMesh struct
-///\return the result of the reading, true if is success, false otherwise
 bool ImportCell2Ds(TriangularMesh& mesh);
+
 
 /*
  * direi che una volta testato il funzionamento di questo file, tutti i cout possano essere commentati
  * bisogna capire bene cosa si può commentare e cosa no
  */
 
-
 // ***************************************************************************
 bool ImportMesh(TriangularMesh& mesh)
 {
-  //cout<<"siamo dentro la funzione"<<endl;
+    //qui magari anzichè passargli un oggetto di tipo TriangularMesh dovremmo passargli un oggetto appartente alla classe vertici
 
+    ///QUI CHIAMO LA FUNZIONE E GLI PASSO L'OGGETTO DELLA CLASSE VERTICI, VISTO CHE STO TRATTANDO QUESTI OGGETTI, QUINDI NE MEMORIZZO LE VARIE INFORMAZIONI
   if(!ImportCell0Ds(mesh))
   {
     return false;
@@ -79,6 +67,7 @@ bool ImportMesh(TriangularMesh& mesh)
     }
   }
 
+  ///QUI CHIAMO LA FUNZIONE E GLI PASSO L'OGGETTO DELLA CLASSE ARCHI, VISTO CHE STO TRATTANDO QUESTO TIPO DI OGGETTI E NE MEMORIZZO LE INFORMAZIONI
   if(!ImportCell1Ds(mesh))
   {
     return false;
@@ -96,6 +85,7 @@ bool ImportMesh(TriangularMesh& mesh)
     }
   }
 
+  ///A QUESTO PUNTO PASSO L'OGGETTO DELLA CLASSE TRIANGOLO E UNISCO I PUNTINI
   if(!ImportCell2Ds(mesh))
   {
     return false;
@@ -249,7 +239,7 @@ bool ImportCell1Ds(TriangularMesh& mesh)
 // ***************************************************************************
 bool ImportCell2Ds(TriangularMesh& mesh)
 {
-
+//ora che importo le mesh 2D potrei metterle direttamente nella classe, anzichè importarle come oggetti nella struct mesh
   ifstream file;
   file.open("./Cell2Ds.csv");
 

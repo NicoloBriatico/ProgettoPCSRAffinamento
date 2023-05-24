@@ -21,53 +21,104 @@
 using namespace std;
 
 namespace ShapeLibrary {
-/* qui va aggiustato perchè non ha senso definire un classe poligono e una triangolo, a noi serve calcolare aree di mesh triangolari, tanto vale implementare solo quelle*/
-//al più potremmo pensare di implementare più metodi per il calcolo delle aree, ma a mio parere è inutikle, tanto scegliamo noi cosa passarglii alla funzione
-  class Polygon {
-    private:
-      Eigen::MatrixXd points;
 
-    public:
-      Polygon() = default;
-      Polygon( Eigen::MatrixXd& points);
-      double Area() ;
-      string Show() {return "Polygon: " + to_string(Area()) ; }
-      //double Area(Eigen::MatrixXd& points){ return Area; }
-  };
+//forse bisogna usare i templete o qualcosa del genere per associare a nodo un insieme di archi di cui a priori non conosco la dimensione
+class Mesh {
+    //qui raccolgo un riassunto sulle informazioni di nodi e di archi
+private:
+    //nodo
+    //archi
+    (...);
+public:
+    //costruttore di default
+    Mesh() = default;
+    //costruttore che mi definisce le cose se gli passo i valori giusti, mi servirebbe creare una sorta di matrice (come ho fatto nella struct e forse conviene copiare quella) nella quale mettere i dati
+    //potrei ad esempio utilizzare l'id come riga della matrice, in modo da salvare i dati in un array di vector di 2 dimensioni, quindi ogni volta che chiamo il costruttore passandogli questi 3 valori
+    //deve aggiungere un elemento nella matrice dinamica...cerca di prendere spunto dalla struct
+    Mesh(...);
+
+    //definisco i metodi:
+    ///calcolo matrice di adiacenza
+    matrix MatriceAdiacenza(...);
+    /// aggiunto valori alla matrice di adiacenza
+    matrix AggiornaMatrice(...);
+    /// algoritmo di ricerca di un nodo o di un lato in base al tipo di oggetto passato
+    int Ricerca(...);
+
+};
+
+
+class Vertici : public Mesh
+{
+    //li uso per leggere il file Cell1D
+private:
+    //mi salvo l'id del nodo
+    int idNodo;
+    //mi salvo le coordinate x e y
+    double x;
+    double y;
+
+public:
+    //chiamo il costruttore di default
+    Vertici() = default;
+    //se a vertici passo le informazioni ci costruisco un oggetto
+    Vertici(int& idNodo, double& x, double& y);
+
+    //definisco i vari metodi:
+    ///dato un nodo voglio che mi restituisca l'id di un lato
+    int TrovaLati(int& idNodo);
+
+    /// dati 3 vertici voglio che li riordini in senso antiorario
+    //non credo si scriva così
+    int Riordina(vector<int>& nodi );
+
+};
+
+
+class Archi : public Mesh
+{
+    //li uso per leggere il file Cell2D
+private:
+    int idArco;
+    int idOrigin;
+    int idEnd;
+
+public:
+    //inizializzo un costruttore di default
+    Archi()=default;
+    //date le tre informazioni definisco un arco
+    Archi(int& idArco, int& idOrigin, int& idEnd );
+
+    //definisco i metodi
+    ///dato un arco trovare gli id dei vertici
+    vector<int> TrovaVertici(int& lato);
+
+};
+
 
   //oss: io gestirei alcuni casi particolari tipo triangolo degenere (eg una linea) che poi testiamo e altre cose patologiche, posto che vogliamo essere in grado di gestirli
-  class Triangle : public Polygon
+  class Triangle    //cercare come si definisce una classe amica, posto che serva definirla come tale!!!
   {
+      //gli passo le coordinate dalla mesh, implemento il metodo area come poligono
     private:
       Eigen::MatrixXd points;
-      double base;
-      double height;
-      bool hasPoints;
-      bool hasBaseHeight;
+      ///se fosse un triangolo a se, 3 vertici basterebbero, ma essendo parte di una mesh mi serve anche segnare chi sono i lati
+      Eigen::MatrixXd lati;
 
     public:
 
       Triangle() = default;
-      Triangle(double& base,
-               double& height);
+      Triangle(Eigen::MatrixXd& points, Eigen::MatrixXd& lati);
 
-      Triangle(Eigen::MatrixXd& points);
+      //definisco i metodi
+      double Area();
+      vector<int> Dimezza();
+      bool Verifica();
+      //string Show() {}
 
-      double Area() ;
-      string Show() {
-          double area = Area();
-          if (hasPoints) {
-
-                return "Triangle As Polygon: "+ to_string(area);
-          }
-          else if (hasBaseHeight){
-                return "Triangle: " + to_string(area) ;
-          }
-          else{
-                return "Dati passati sbagliati";
-          }
-      }
   };
+
+
 }
 
 
