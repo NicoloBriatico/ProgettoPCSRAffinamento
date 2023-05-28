@@ -4,8 +4,10 @@
 
 #include <iostream>
 #include "Eigen/Eigen"
+#include "map"
 
-/*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA     */
+
+
 
 // Un'idea potrebbe essere:
 /*definire una classe triangolo che ha diversi metodi:
@@ -17,104 +19,68 @@
  * oss: nell'ottica della lezione del 19/05 potremmo anche pensare di definire 3 classi al posto di 3 metodi, ma va capito anche se ne vale effettivamente la pena
  */
 
-
+using namespace Eigen;
 using namespace std;
 
 namespace ShapeLibrary {
 
-//forse bisogna usare i templete o qualcosa del genere per associare a nodo un insieme di archi di cui a priori non conosco la dimensione
-class Mesh {
-    //qui raccolgo un riassunto sulle informazioni di nodi e di archi
-private:
-    //nodo
-    //archi
-    (...);
-public:
-    //costruttore di default
-    Mesh() = default;
-    //costruttore che mi definisce le cose se gli passo i valori giusti, mi servirebbe creare una sorta di matrice (come ho fatto nella struct e forse conviene copiare quella) nella quale mettere i dati
-    //potrei ad esempio utilizzare l'id come riga della matrice, in modo da salvare i dati in un array di vector di 2 dimensioni, quindi ogni volta che chiamo il costruttore passandogli questi 3 valori
-    //deve aggiungere un elemento nella matrice dinamica...cerca di prendere spunto dalla struct
-    Mesh(...);
-
-    //definisco i metodi:
-    ///calcolo matrice di adiacenza
-    matrix MatriceAdiacenza(...);
-    /// aggiunto valori alla matrice di adiacenza
-    matrix AggiornaMatrice(...);
-    /// algoritmo di ricerca di un nodo o di un lato in base al tipo di oggetto passato
-    int Ricerca(...);
-
-};
-
-
-class Vertici : public Mesh
+struct TriangularMesh
 {
-    //li uso per leggere il file Cell1D
-private:
-    //mi salvo l'id del nodo
-    int idNodo;
-    //mi salvo le coordinate x e y
-    double x;
-    double y;
+    unsigned int NumberCell0D = 0; ///< number of Cell0D
+    std::vector<unsigned int> Cell0DId = {}; ///< Cell0D id, size 1 x NumberCell0D
+    std::vector<Vector2d> Cell0DCoordinates = {}; ///< Cell0D coordinates, size 2 x NumberCell0D (x,y)
+    std::map<unsigned int, list<unsigned int>> Cell0DMarkers = {}; ///< Cell0D markers, size 1 x NumberCell0D (marker)
 
-public:
-    //chiamo il costruttore di default
-    Vertici() = default;
-    //se a vertici passo le informazioni ci costruisco un oggetto
-    Vertici(int& idNodo, double& x, double& y);
-
-    //definisco i vari metodi:
-    ///dato un nodo voglio che mi restituisca l'id di un lato
-    int TrovaLati(int& idNodo);
-
-    /// dati 3 vertici voglio che li riordini in senso antiorario
-    //non credo si scriva così
-    int Riordina(vector<int>& nodi );
+    unsigned int NumberCell1D = 0; ///< number of Cell1D
+    std::vector<unsigned int> Cell1DId = {}; ///< Cell1D id, size 1 x NumberCell1D
+    std::vector<Vector2i> Cell1DVertices = {}; ///< Cell1D vertices indices, size 2 x NumberCell1D (fromId,toId)
+    std::map<unsigned int, list<unsigned int>> Cell1DMarkers = {}; ///< Cell1D propertoes, size 1 x NumberCell1D (marker)
 
 };
 
 
-class Archi : public Mesh
-{
-    //li uso per leggere il file Cell2D
-private:
-    int idArco;
-    int idOrigin;
-    int idEnd;
-
-public:
-    //inizializzo un costruttore di default
-    Archi()=default;
-    //date le tre informazioni definisco un arco
-    Archi(int& idArco, int& idOrigin, int& idEnd );
-
-    //definisco i metodi
-    ///dato un arco trovare gli id dei vertici
-    vector<int> TrovaVertici(int& lato);
-
-};
-
-
-  //oss: io gestirei alcuni casi particolari tipo triangolo degenere (eg una linea) che poi testiamo e altre cose patologiche, posto che vogliamo essere in grado di gestirli
-  class Triangle    //cercare come si definisce una classe amica, posto che serva definirla come tale!!!
+  class Triangle
   {
-      //gli passo le coordinate dalla mesh, implemento il metodo area come poligono
+    //attenzione che andrebbero messi in ordine gli attributi così come glieli passo, infatti mi da un warning -Wreorder
     private:
-      Eigen::MatrixXd points;
-      ///se fosse un triangolo a se, 3 vertici basterebbero, ma essendo parte di una mesh mi serve anche segnare chi sono i lati
-      Eigen::MatrixXd lati;
+      array<unsigned int, 3> vertices;
+      TriangularMesh& mesh ;
+      Eigen::MatrixXd coordinate;
 
     public:
-
+      unsigned int id;
+      array<unsigned int, 3> edges;
       Triangle() = default;
-      Triangle(Eigen::MatrixXd& points, Eigen::MatrixXd& lati);
+      //io gli passo i vertici presi dalla triangular mesh che sono un array e la struct0d con le informazioni sui vertici
+      Triangle(unsigned int& id, array<unsigned int, 3>& vertices, array<unsigned int, 3>& edges, TriangularMesh& mesh);
 
       //definisco i metodi
       double Area();
-      vector<int> Dimezza();
-      bool Verifica();
-      //string Show() {}
+      int Vicini(ShapeLibrary::Triangle& triangolo2);
+      //vector<int> Raffina();
+
+  };
+
+
+  class Mesh
+  {
+    private:
+      vector<ShapeLibrary::Triangle> lista;
+
+
+    public:
+      //la sto pensando come una matrice di numerotriangoliXnumerotriangoli simmetrica che indica se triangolo i è collegato a triangolo j con l'arco segnato come argomento della matrice
+       Eigen::MatrixXd adiacenza;
+      Mesh() = default;
+      //io gli passo i vertici presi dalla triangular mesh che sono un array e la struct0d con le informazioni sui vertici
+      Mesh(vector<ShapeLibrary::Triangle>& lista);
+
+      //definisco i metodi
+      ///aggiungo un triangolo alla mesh
+      /// verifico la buona positura della mesh (qui devo richiamare il metodo di raffinamento della classe triangolo
+      //vector<int> Raffina();
+      //bool Verifica();
+
 
   };
 
@@ -124,31 +90,4 @@ public:
 
 
 
-
-
-
-
-
-
-
-
-
-/*
-#ifndef __SHAPE_H
-#define __SHAPE_H
-
-
-
-
-
-
-
-
-
-
-
-}
-#endif // __SHAPE_H
-
-*/
 #endif // __EMPTY_H

@@ -6,52 +6,32 @@
 #include "Eigen/Eigen"
 #include <fstream>
 #include "map"
+#include "empty_class.hpp"
+
 
 using namespace std;
 using namespace Eigen;
+using namespace ShapeLibrary;
 
-struct TriangularMesh
-{
-    unsigned int NumberCell0D = 0; ///< number of Cell0D
-    std::vector<unsigned int> Cell0DId = {}; ///< Cell0D id, size 1 x NumberCell0D
-    std::vector<Vector2d> Cell0DCoordinates = {}; ///< Cell0D coordinates, size 2 x NumberCell0D (x,y)
-    std::map<unsigned int, list<unsigned int>> Cell0DMarkers = {}; ///< Cell0D markers, size 1 x NumberCell0D (marker)
 
-    unsigned int NumberCell1D = 0; ///< number of Cell1D
-    std::vector<unsigned int> Cell1DId = {}; ///< Cell1D id, size 1 x NumberCell1D
-    std::vector<Vector2i> Cell1DVertices = {}; ///< Cell1D vertices indices, size 2 x NumberCell1D (fromId,toId)
-    std::map<unsigned int, list<unsigned int>> Cell1DMarkers = {}; ///< Cell1D propertoes, size 1 x NumberCell1D (marker)
 
-    unsigned int NumberCell2D = 0; ///< number of Cell2D
-    std::vector<unsigned int> Cell2DId = {}; ///< Cell2D id, size 1 x NumberCell2D
-    std::vector<array<unsigned int, 3>> Cell2DVertices = {}; ///< Cell2D Vertices indices, size 1 x NumberCell2DVertices[NumberCell2D]
-    std::vector<array<unsigned int, 3>> Cell2DEdges = {}; ///< Cell2D Cell1D indices, size 1 x NumberCell2DEdges[NumberCell2D]
-};
-
-bool ImportMesh(TriangularMesh& mesh);
+bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista);
 
 bool ImportCell0Ds(TriangularMesh& mesh);
 
 bool ImportCell1Ds(TriangularMesh& mesh);
 
-bool ImportCell2Ds(TriangularMesh& mesh);
-
-
-/*
- * direi che una volta testato il funzionamento di questo file, tutti i cout possano essere commentati
- * bisogna capire bene cosa si può commentare e cosa no
- */
+bool ImportCell2Ds(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista);
 
 // ***************************************************************************
-bool ImportMesh(TriangularMesh& mesh)
+bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista)
 {
-    //qui magari anzichè passargli un oggetto di tipo TriangularMesh dovremmo passargli un oggetto appartente alla classe vertici
 
-    ///QUI CHIAMO LA FUNZIONE E GLI PASSO L'OGGETTO DELLA CLASSE VERTICI, VISTO CHE STO TRATTANDO QUESTI OGGETTI, QUINDI NE MEMORIZZO LE VARIE INFORMAZIONI
   if(!ImportCell0Ds(mesh))
   {
     return false;
   }
+  /* TEST PER VEDERE SE FUNZIONA
   else
   {
     cout << "Cell0D marker:" << endl;
@@ -65,13 +45,13 @@ bool ImportMesh(TriangularMesh& mesh)
       cout << endl;
 
     }
-  }
+  }*/
 
-  ///QUI CHIAMO LA FUNZIONE E GLI PASSO L'OGGETTO DELLA CLASSE ARCHI, VISTO CHE STO TRATTANDO QUESTO TIPO DI OGGETTI E NE MEMORIZZO LE INFORMAZIONI
   if(!ImportCell1Ds(mesh))
   {
     return false;
   }
+  /* TEST PER VEDERE SE FUNZIONA
   else
   {
     cout << "Cell1D marker:" << endl;
@@ -83,14 +63,15 @@ bool ImportMesh(TriangularMesh& mesh)
 
       cout << endl;
     }
-  }
+  }*/
 
-  ///A QUESTO PUNTO PASSO L'OGGETTO DELLA CLASSE TRIANGOLO E UNISCO I PUNTINI
-  if(!ImportCell2Ds(mesh))
+
+  if(!ImportCell2Ds(mesh, lista))
   {
     return false;
   }
-  else
+  //controllo che tutto funzioni, ma non stampo nulla a video
+  /*else
   {
     // Test:
     for(unsigned int c = 0; c < mesh.NumberCell2D; c++)
@@ -115,13 +96,11 @@ bool ImportMesh(TriangularMesh& mesh)
            cerr << "Wrong mesh" << endl;
            return 3;
          }
-
-         //qui dovrebbe bastare commentare la riga sotto
-         cout << "c: " << c << ", origin: " << *findOrigin << ", end: " << *findEnd << endl;
+         //cout << "c: " << c << ", origin: " << *findOrigin << ", end: " << *findEnd << endl;
 
       }
     }
-  }
+  }*/
 
   return true;
 
@@ -237,7 +216,7 @@ bool ImportCell1Ds(TriangularMesh& mesh)
   return true;
 }
 // ***************************************************************************
-bool ImportCell2Ds(TriangularMesh& mesh)
+bool ImportCell2Ds(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista)
 {
 //ora che importo le mesh 2D potrei metterle direttamente nella classe, anzichè importarle come oggetti nella struct mesh
   ifstream file;
@@ -253,17 +232,17 @@ bool ImportCell2Ds(TriangularMesh& mesh)
 
   listLines.pop_front();
 
-  mesh.NumberCell2D = listLines.size();
+  unsigned int NumberCell2D = listLines.size();
 
-  if (mesh.NumberCell2D == 0)
+  if (NumberCell2D == 0)
   {
     cerr << "There is no cell 2D" << endl;
     return false;
   }
 
-  mesh.Cell2DId.reserve(mesh.NumberCell2D);
+  /*mesh.Cell2DId.reserve(mesh.NumberCell2D);
   mesh.Cell2DVertices.reserve(mesh.NumberCell2D);
-  mesh.Cell2DEdges.reserve(mesh.NumberCell2D);
+  mesh.Cell2DEdges.reserve(mesh.NumberCell2D);*/
 
   for (const string& line : listLines)
   {
@@ -274,14 +253,24 @@ bool ImportCell2Ds(TriangularMesh& mesh)
     array<unsigned int, 3> edges;
 
     converter >>  id;
+    //cout<<id<<"\t";
     for(unsigned int i = 0; i < 3; i++)
       converter >> vertices[i];
+      //cout<<vertices[i]<< " ";
+    //cout<<"\t";
     for(unsigned int i = 0; i < 3; i++)
       converter >> edges[i];
+      //cout<<edges[i]<<" ";}
+    //cout<<endl;
 
-    mesh.Cell2DId.push_back(id);
+    /*mesh.Cell2DId.push_back(id);
     mesh.Cell2DVertices.push_back(vertices);
-    mesh.Cell2DEdges.push_back(edges);
+    mesh.Cell2DEdges.push_back(edges);*/
+
+    //costruisco il triangolo
+    ShapeLibrary::Triangle triangolo = ShapeLibrary::Triangle(id, vertices, edges, mesh);
+    lista.push_back(triangolo);
+
   }
   file.close();
   return true;

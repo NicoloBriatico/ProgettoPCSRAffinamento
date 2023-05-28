@@ -31,48 +31,12 @@ using namespace Eigen;
 
 namespace SortLibrary {
 
-/*
-//impostazioni per ordinare in senso inverso
-  struct DecreasingInt
-  {
-    int value;
-    DecreasingInt() = default;
-    DecreasingInt(const int& value): value(value){}
-
-  };
-
-  inline ostream &operator<<(ostream &os, const DecreasingInt &obj)
-  {
-    os << obj.value;
-    return os;
-  }
-
-  inline bool operator==(const DecreasingInt &obj1, const DecreasingInt &obj2)
-  {
-    return obj1.value == obj2.value;
-  }
-
-  inline bool operator!=(const DecreasingInt &obj1, const DecreasingInt &obj2)
-  {
-    return !(obj1 == obj2);
-  }
-
-  inline bool operator<(const DecreasingInt &obj1, const DecreasingInt &obj2)
-  {
-    return obj1.value > obj2.value;
-  }
-
-  inline bool operator>(const DecreasingInt &obj1, const DecreasingInt &obj2)
-  {
-    return obj1.value < obj2.value;
-  }
-*/
 
 /* PER ORA HO LASCIATO LO HEAPSORT, POI SCEGLIAMO BENE COSA IMPLEMENTARE*/
 
   template<typename T>
   //funzione che scambia gli indici
-  void Scambia(unsigned int i, unsigned int j,vector<T>& heapTree ) {
+  inline void Scambia(unsigned int i, unsigned int j,vector<T>& heapTree ) {
     //salvo l'elemento in posizione i esima
     T tmp = heapTree[i];
     //scambio l'elemento i esimo con quello in posizione j
@@ -82,12 +46,12 @@ namespace SortLibrary {
   }
 
   //dato un nodo il padre è definito come
-  int Padre(unsigned int i)  {
+  inline int Padre(unsigned int i)  {
     return (i - 1) / 2;
   }
 
   //dato un nodo mi calcolo i figli sinistri
-  unsigned int Sinistro(unsigned int i)  {
+  inline unsigned int Sinistro(unsigned int i)  {
     return 2 * i + 1;
   }
 

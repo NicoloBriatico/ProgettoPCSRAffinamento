@@ -1,22 +1,13 @@
 #include <iostream>
-/*
- * va valutato quali librerie importare e quali file importare e dove
- */
-
-//#include "Eigen/Eigen"
-//#include <fstream>
-//#include "map"
-
+#include "Eigen/Eigen"
+#include "map"
 
 //file contenente il codice per il sorting
 #include "sortingArea.hpp"
-
 //file contenente la definizione delle tolleranze
 #include "tolleranza.hpp"
-
 //file contente le funzioni per importare la mesh
 #include "importa.hpp"
-
 //file contente le classi
 #include "empty_class.hpp"
 
@@ -24,13 +15,10 @@
 /*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA     */
 
 
-
+using namespace std;
 // ***************************************************************************
 int main()
 {
-
-    //FARE ATTENZIONE, VANNO OMOLOGATI I NOMI DEI FILE E I VARI RICHIAMI AD ESSI//
-
     /* PER ULIZZARE UNA CLASSE RICORDA:
      * METTERE #include "empty_class.hpp" all'inizio del file
      * scrivere nel codice ProjectLibrary::Empty empty;
@@ -57,39 +45,75 @@ input tre vertici e tre lati costruisce un triangolo, come metodo ha il calcolo 
     */
 
 
-    ////////ATTENZIONE, NEL DEFINIRE LE CLASSI MESH, VERTICI, ARCHI, TRIANGOLI, PRENDI SPUNTO ( CIOÈ COPIA I TIPI E LA LOGICA, GROSSOMODO, DI IMPORTAZIONE DEL DATO
-    /// CHE VENIVA UTILIZZATA NELLA STRUCT
-    /// ATTENZIONE, POSSO FARE IN UNA CLASSE QUELLO CHE FACEVO IN UNA STRUCT, MA DEVE AVERE SENSO: LA STRUCT NON HA UNA LOGICA, MENTRE LE CLASSI SI
-    /// L'IDEA QUINDI È DI FAR FARE COSE HAI DATI CHE STIAMO RACCOGLIENDO, TIPO FAR PARTIRE DELLE RICERCHE, CALCOLARE MATRICI, AGGIORNARE MATRICI ECC
-    /// TENERE BENE A MENTE QUESTA COSA, ANCHE PER DARE UN SENSO ALLA PROGRAMMAZIONE AD OGGETTI
-    ////////
 
+    ShapeLibrary::TriangularMesh trimesh;
+    vector<ShapeLibrary::Triangle> lista;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //dobbiamo valutare se mantenere questa impostazione, oppure sceglierne una diversa da quella fatta dalla Teo
-  //definiamo la mesh sfruttando la struct quindi importiamo i dati
-
-  ///SE OPTIAMO PER LA MESH COME CLASSE, DOBBIAMO PASSARGLI DEI COMANDI DIVERSI E SICURAMENTE LA MESH NON SARA UNA TRIANGULAR MESH, OVVERO UN OGGETTO DI TIPO STRUCT
-    TriangularMesh mesh; //VA CAMBIATO IL TIPO E FORSE NE VA PASSATO PIÙ DI UNO (FORSE DOVREMMO PASSARGLI MESH, VERTICI, ARCHI)
-
-  if(!ImportMesh(mesh))
+    if(!ImportMesh(trimesh, lista))
   {
     return 1;
   }
+  //all'interno di mesh ho tutte le informazioni dei 3 file .csv
+
+  //creo tutti i triangoli e ne calcolo l'area
+  ///per esempio potrei parallelizzare questa cosa///
+  map<int, double> aree = {};
+  vector<double> v= {};
+  //calcolo le aree
+for(unsigned int i=0; i< lista.size();i++)
+{
+    double area =lista[i].Area();
+    //cout<<i<<" "<<area<<endl;
+    aree.insert({lista[i].id, area});
+    v.push_back(area);
+}
+//ordino le aree
+vector<double> areaS=SortLibrary::HeapSort<double>(v);
+    //CERCO IL PRIMO TRIANGOLO DA RAFFINARE
+    unsigned int idPartenza;
+    for (const auto& coppia : aree) {
+            if (coppia.second == areaS[0]) {
+                idPartenza = coppia.first;
+                break;
+            }
+        }
+   cout<<idPartenza<<endl;
+   ShapeLibrary::Mesh mesh =Mesh(lista);
+   Eigen::MatrixXd matriceAdiacenza = mesh.adiacenza;
+
+   //faccio partire il raffinamento
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   return 0;
+
+
   ///TEORICAMENTE SE TUTTO VA A BUON FINE IO DOVREI AVERE UN VERTICI TUTTI I VERTICI, IN ARCHI GLI ARCHI E IN TRIANGOLI I TRIANGOLI, ADESSO UNISCO LE INFORMAZIONI DI VERTICI E ARCHI
   /// DENTRO LA CLASSE MESH, IN MODO DA CREARE LA MATRICE DI ADIACENZA.
   /// A QUESTO PUNTO SFRUTTO LA MATRICE DI ADIACENZA PER CONTINUARE A LAVORARE
@@ -104,6 +128,7 @@ input tre vertici e tre lati costruisce un triangolo, come metodo ha il calcolo 
  * test per il calcolo dell'area della classe triangolo
  *
  *
+ */
 
 /*                                                              PROBLEMI DA RISOLVERE
  *capire come si fa a settare le tolleranze, basta fare #include file??
@@ -133,6 +158,19 @@ input tre vertici e tre lati costruisce un triangolo, come metodo ha il calcolo 
  *per inserire un file nel Header File o nel Source File, aprire il file CMakeList.txt in src (in basso) e scrivere list(APPEND raffinamento_headers ${CMAKE_CURRENT_SOURCE_DIR}/empty_class.hpp) sostituendo i nomi dei file scelti;
  *
  *anche i file da leggere vanno inseriti nel cmakelist quello in alto
+ *
+ *Per stampare elementi di una mappa
+ *  STAMPARE I CONTENUTI DELLA MAPPA
+  for(auto it = aree.begin(); it != aree.end(); it++)
+  {
+
+    cout << "key:\t" << it -> first << "\t values:"<<it -> second;
+    //for(const unsigned int id : it -> second)
+      //cout << "\t" << id;
+
+    cout << endl;
+  }
+
  *
  *
  *
