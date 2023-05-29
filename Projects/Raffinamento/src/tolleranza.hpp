@@ -83,6 +83,9 @@ namespace TolleranzaLibrary
 
 //FORSE DOVREMMO INSERIRE IL SORTING PER DARGLI UN DEFINIZIONE DI TOLLERANZA NEL CALCOLO DEL <, >,  =, ECC..-
 
+  template<typename T>
+  vector<T> HeapSort(const vector<T>& v);
+
   /*non credo che queste funzioni ci servano*/
 
   /*bool UpperLine(const Point& p1,

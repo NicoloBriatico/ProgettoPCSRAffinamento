@@ -6,15 +6,18 @@
 #include "Eigen/Eigen"
 #include <fstream>
 #include "map"
+
+//devo imporare questo file per poter utilizzare la struct e le classi
 #include "empty_class.hpp"
 
 
 using namespace std;
 using namespace Eigen;
+//mi serve per far funzionare l'accesso alla libreria
 using namespace ShapeLibrary;
 
 
-
+//prende in input anche la lista di triangoli che sarà utile per l'import dati del file cell2d
 bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista);
 
 bool ImportCell0Ds(TriangularMesh& mesh);
@@ -31,6 +34,7 @@ bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista
   {
     return false;
   }
+
   /* TEST PER VEDERE SE FUNZIONA
   else
   {
@@ -51,6 +55,7 @@ bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista
   {
     return false;
   }
+
   /* TEST PER VEDERE SE FUNZIONA
   else
   {
@@ -70,7 +75,8 @@ bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista
   {
     return false;
   }
-  //controllo che tutto funzioni, ma non stampo nulla a video
+
+  //TEST PER VEDERE SE FUNZIONA (andrebbe cambiato considerando l'accesso agli elementi di una classe e non più alla struct)
   /*else
   {
     // Test:
@@ -218,7 +224,6 @@ bool ImportCell1Ds(TriangularMesh& mesh)
 // ***************************************************************************
 bool ImportCell2Ds(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista)
 {
-//ora che importo le mesh 2D potrei metterle direttamente nella classe, anzichè importarle come oggetti nella struct mesh
   ifstream file;
   file.open("./Cell2Ds.csv");
 
@@ -240,10 +245,6 @@ bool ImportCell2Ds(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& li
     return false;
   }
 
-  /*mesh.Cell2DId.reserve(mesh.NumberCell2D);
-  mesh.Cell2DVertices.reserve(mesh.NumberCell2D);
-  mesh.Cell2DEdges.reserve(mesh.NumberCell2D);*/
-
   for (const string& line : listLines)
   {
     istringstream converter(line);
@@ -253,19 +254,13 @@ bool ImportCell2Ds(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& li
     array<unsigned int, 3> edges;
 
     converter >>  id;
-    //cout<<id<<"\t";
+
     for(unsigned int i = 0; i < 3; i++)
       converter >> vertices[i];
-      //cout<<vertices[i]<< " ";
-    //cout<<"\t";
+
     for(unsigned int i = 0; i < 3; i++)
       converter >> edges[i];
-      //cout<<edges[i]<<" ";}
-    //cout<<endl;
 
-    /*mesh.Cell2DId.push_back(id);
-    mesh.Cell2DVertices.push_back(vertices);
-    mesh.Cell2DEdges.push_back(edges);*/
 
     //costruisco il triangolo
     ShapeLibrary::Triangle triangolo = ShapeLibrary::Triangle(id, vertices, edges, mesh);

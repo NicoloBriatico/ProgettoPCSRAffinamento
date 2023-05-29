@@ -8,33 +8,31 @@ using namespace std;
 
 namespace ShapeLibrary {
 
-
+//il costruttore di triangoli prende in input le info del file e le salva, in più deriva le coordinate dai vertici
 Triangle::Triangle(unsigned int& id, array<unsigned int, 3>& vertices, array<unsigned int, 3>& edges, TriangularMesh& mesh):
     id(id),
     vertices(vertices),
     edges(edges),
     mesh(mesh){
-    //mi salvo subito le coordinate associate al triangolo
+
+    //associo i vertici alle coordinate: prima riga le x, seconda riga le y
     Eigen::MatrixXd coordinates = Eigen::MatrixXd::Zero(2,3);
     for (unsigned int i=0; i<3;i++){
         unsigned int j = vertices[i];
-        //rispetto alla matrice coordinate nella prima riga inserisco le coordinate X, nella seconda le coordinate Y
         float coordx =mesh.Cell0DCoordinates[j][0];
         float coordy =mesh.Cell0DCoordinates[j][1];
         coordinates(0,i) = coordx;
         coordinates(1,i) = coordy;
-        //cout<<vertici[i]<<"\t"<<coordx<<"\t"<<coordy<<endl;
         }
     coordinate = coordinates;
-    //cout<<coordinate<<endl;
-    //return coordinate;
+
 }
 
+//definisco il metodo per il calcolo delle aree
 double Triangle::Area()
 {
-    //Eigen::MatrixXd coordinate;
-    //mi faccio costruire le coordinate, quindi calcolo l'area
-    //Eigen::MatrixXd coordinate = ShapeLibrary::Triangle::Coordinate();
+    //devo tenere conto che la matrice con le coordinate è già salvata, quindi posso farne accesso anche senza chiamarla esplicitamente
+
     double area = 0.0;
     //unsigned int righe = points.rows();
     unsigned int colonne  = coordinate.cols();
@@ -51,7 +49,6 @@ double Triangle::Area()
     area = 0.5*area;
 
     //uso la formula di Gauss: semi somma delle coordinate y*(xprecedente -x successivo in senso antiorario)
-    //cout<<area<<endl;
     return abs(area);
 }
 
@@ -61,6 +58,8 @@ int Triangle::Vicini(ShapeLibrary::Triangle& triangolo2)
     //partendo dal presupposto che due triangolo possono avere al massimo un lato in comune:
     //controllo se il triangolo1 e il 2 sono adiacenti verificando se hanno un lato in comune
 
+    //OSSERVAZIONE: anche se non dovrebbe mai capitare, secondo me sarebbe opportuno verificare che non vengano avanzate proposte di confronto fra due triangoli uguali
+    //dovremmo quindi controllare che l'id del triangolo che stiamo valutando sia diverso dall'id del traingolo2
     for(unsigned int i=0; i<3; i++)
     {
         int vertice1= edges[i];
@@ -72,7 +71,8 @@ int Triangle::Vicini(ShapeLibrary::Triangle& triangolo2)
                 return vertice2;
         }
     }
-    return -1;
+    //ritorno un valore a caso che non sia il nome di uno degli archi
+    return -4;
 }
 
 
@@ -81,23 +81,21 @@ int Triangle::Vicini(ShapeLibrary::Triangle& triangolo2)
 
 
 };
-bool Triangle::Verifica(){
 
-};
-*/
-/*vector<ShapeLibrary::Triangle> lista;
- Eigen::MatrixXd adiacenza;
 */
 
-//io gli passo i vertici presi dalla triangular mesh che sono un array e la struct0d con le informazioni sui vertici
+
+//gli passo una lista di oggetti della classe triangolo e ne deriva la matrice di adiacenza
 Mesh::Mesh(vector<ShapeLibrary::Triangle>& lista): lista(lista){
+
     //calcolo la matrice di adiacenza
     unsigned int numTri = lista.size();
-    Eigen::MatrixXd adj = Eigen::MatrixXd::Zero(numTri,numTri);
+
+    Eigen::SparseMatrix<double> adj(numTri,numTri);
+
     //cerco le adiacenze frai vari triangoli
     for (unsigned int i= 0; i< numTri-1; i++)
     {
-
         //seleziono un triangolo
         for (unsigned int j = i+1; j<numTri;j++)
         {
@@ -106,12 +104,9 @@ Mesh::Mesh(vector<ShapeLibrary::Triangle>& lista): lista(lista){
             if (link >=0)
             {
                 //cout<<link<<endl;
-                adj(lista[i].id, lista[j].id) = link;
-                adj(lista[j].id, lista[i].id) = link;
+                adj.insert(lista[i].id, lista[j].id) = link;
+                adj.insert(lista[j].id, lista[i].id) = link;
             }
-            //le segno nella matrice di adiacenza
-
-
         }
     }
     adiacenza = adj;

@@ -19,57 +19,107 @@ using namespace std;
 // ***************************************************************************
 int main()
 {
-    /* PER ULIZZARE UNA CLASSE RICORDA:
-     * METTERE #include "empty_class.hpp" all'inizio del file
-     * scrivere nel codice ProjectLibrary::Empty empty;
-     * chiamare l'oggetto con il metodo*/
 
+    /*
+     *                  INFO/PAZZIA
+     *La mia idea pazza, una volta terminata la stesura del progetto è quella di stressare il più possibile il codice per verificarne il buon funzionamento e l'ottimizzazione delle parti
+     *ovvero cercare/creare una mesh moooooooooooolto grande e vedere se continua a funzionare e quindi proporre come possibile soluzione (e confronto) l'uso di codice parallelizzato
+     *questa cosa potrebbe tornarci comoda nell'ottica della relazione e poi mi eccita tantissimo parallelizzare il codice ahhah.
+     *Detto questo, questa parte esce un po' fuori dalle richieste del progetto ed è penso notevolmente complicata (la parallelllizzazione), quindi fai finta di niente.
+     *Ogni tanto all'interno del codice potresti trovare tipo ///questo codice si può parallelizzare m, che sono dei remarker per me qualora volessimo implementare la parallellizzazione
+     *
+     *
+     *                     STRUTTURE DATI
+     * - LA STRUCT (vedi "empty_class.hpp") è come quella impostata dalla Teora, manca dell'ultima parte (Cell2d), che è stata sostituita dalla classe Triangle. Vengono Cell0d e cell1d vengono letti come
+     * aveva implementato la Teora, il file Cell2d ha la stessa implementazione della Teora, ma viene memorizzato in un oggetto della classe triangolo (vedi "importa.hpp")
+     *
+     * -è stata ristrutturata la classe TRIANGLE: è una classe senza figli o padre, prende in input le informazioni del file cell2d e costruisce una matrice con le coordinate (estratte
+     * dalla struct), che ci consente di calcolare agilmente l'area con il metodo di Gauss;
+     * metodi implementati:
+     *    . area del triangolo
+     *    . Vicini (no, non parlo del prof)
+     *Da implementare:
+     *      .Dimezza
+     *Per informazioni più dettagliate vedi "empty_class.hpp"
+     *
+     *- è stata ristrutturata la classe MESH: è una classe senza padre o figli (per ora), prende in input un vettore di oggetti appartenti alla classe triangolo e calcola
+     *subito una matrice di Adiacenza ATTENZIONE!!!! PER LA MATRICE DI ADIACENZA HO OPTATO PER UNA MATRICE SPARSA (QUINDI NON UNA MATRICE COMPLETA) PER QUESTIONI DI EFFICIENZA
+     *metodi implementati:
+     *          .
+     *metodi da implementare:
+     *          . aggiunta di un triangolo alla matrice di adiacenza
+     *          .verifica della buona positura di una mesh
+     *
+     *
+     *          SORTING
+     *il sorting che ho scritto è quello dell'heapsort dell'esercitazione 6, volendo possiamo sceglierne un'altro
+     *POTREMMO PENSARE DI IMPLEMENTARE DIVERSAMENTE L'HEAPSORT, PERCHÈ COM'È SCRITTO ORA RESTITUISCE UN VETTORE, POTREMMO PENSARE DI FARGLIELO MODIFICARE, MA DOVREMMO ANCHE
+     *CONSIDERARE IL RISCHIO DI FARE UN'OPERAZIONE DEL GENERE!!!!!!!
+     *
+     *
+     *          TOLLERANZA
+     *ho settato le operazioni di tolleranza come nell'esercitazione 8 tipo, ma bisogna creare un collegamento con l'heapsort (forse)
+     *
+     *
+     *                   LINEA GUIDA
+     * -LEGGERE I FILE E SALVARE I CONTENUTI
+     * -CALCOLARE LE AREE DEI TRIANGOLI E SALVARLE IN UN FILE
+     * -CREARE LA MESH DI PARTENZA
+     * -TROVARE IL TRIANGOLO PIÙ GRANDE <-NOI SIAMO QUI ORA
+     * -RAFFINARE IL TRIANGOLO
+     * -VERIFICARE CHE LA MESH SIA BEN POSTA
+     * -ESPORTARE IL FILE
+     */
 
 
     /*      VA SETTATA LA TOLLERANZA INIZIALE       */
 
+    //----------------------------------------------------
 
-
-/*Al posto di utilizzare una struct per la lettura potremmo definire una classe oggetto padre Mesh, all'interno della quale andremo ad inserire
- *  i vertici e gli annessi archi; nella classe figlia vertici metteremo i vertici, nell'altra classe figlia archi metteremo gli archi.
-Ora, l'idea è che all'interno della classe padre Mesh noi possiamo implementare un metodo per il calcolo della matrice di adiacenza, uno per
-l'aggiornamento di una matrice di adiacenza, uno per la ricerca dei nodi; nella classe vertice implementare un metodo per la ricerca dei lati
- che passano per un nodo e dei lati che passano per due nodi (ricorrendo al metodo di ricerca della classe padre [o qualcosa del genere] ),
-passati tre punti al costruttore me li ordina in modo da averli sempre ordinati in senso antiorario; la classe lati, preso in input un lato
-(passando per il metodo della classe padre) mi restituisce i vertici che ne sono le estremità.
-
-La classe triangolo, almeno per il momento l'avevo pensata come qualcosa del tipo classe amica di mesh (o forse di tutte e tre), che dati in
-input tre vertici e tre lati costruisce un triangolo, come metodo ha il calcolo dell'area, il dimezzamento e la verifica. (i metodi ereditati
- principalmente sarebbero i metodi di ricerca di archi o nodi).
-
-    */
-
-
-
-    ShapeLibrary::TriangularMesh trimesh;
+    //definisco un oggetto di tipo struct
+    TriangularMesh trimesh;       //trimesh mi ricorda un sacco trimon ahahha (mi diverto con poco lo so)
+    //definisco la lista che mi conterrà i triangoli che creerò leggendo il file Cell2d
     vector<ShapeLibrary::Triangle> lista;
 
     if(!ImportMesh(trimesh, lista))
-  {
+    {
     return 1;
-  }
-  //all'interno di mesh ho tutte le informazioni dei 3 file .csv
+    }
 
-  //creo tutti i triangoli e ne calcolo l'area
-  ///per esempio potrei parallelizzare questa cosa///
-  map<int, double> aree = {};
-  vector<double> v= {};
-  //calcolo le aree
-for(unsigned int i=0; i< lista.size();i++)
-{
-    double area =lista[i].Area();
-    //cout<<i<<" "<<area<<endl;
-    aree.insert({lista[i].id, area});
-    v.push_back(area);
-}
-//ordino le aree
-vector<double> areaS=SortLibrary::HeapSort<double>(v);
-    //CERCO IL PRIMO TRIANGOLO DA RAFFINARE
+    /*arrivato a questo punto ho:
+    *-trimesh contente le informazioni su vertici e archi;
+    *-lista contente oggetti di tipo triangolo, ciascuno contente informazioni sui triangoli
+    */
+
+    //--------------------------------------------------------
+
+    //osservazione: ho messo tutti i triangoli in una lista per due motivi
+    //1) mi servono per creare l'oggetto nella classe mesh;
+    //2) li ho creati in una funzione, ha senso salvarli perchè tanto mi serviranno di nuovo.
+
+
+
+    ///per esempio potrei parallelizzare questa cosa///
+    //definisco questa mappa che associerà all'id del triangolo la sua area
+    map<int, double> aree = {};
+    //v vettore temporaneo per ordinare le aree
+    //per esempio qui sarebbe carino se riuscissimo ad evitare di creare un vettore così e passare direttamente a heapSort un vettore di aree (però per ora così funziona)
+    vector<double> v= {};
+
+    //calcolo le aree dei triangoli
+    for(unsigned int i=0; i< lista.size();i++)
+    {
+        double area =lista[i].Area();
+        //inserisco id e area nella mappa, solo l'area nella lista
+        aree.insert({lista[i].id, area});
+        v.push_back(area);
+    }
+
+    //-----------------------------------------------------------------------
+    //ordino la lista, estraggo l'area più grande e attraverso la mappa mi ricollego all'id del triangolo
+
+    vector<double> areaS=SortLibrary::HeapSort<double>(v);
+    //cerco l'id del primo triangolo
     unsigned int idPartenza;
     for (const auto& coppia : aree) {
             if (coppia.second == areaS[0]) {
@@ -77,51 +127,43 @@ vector<double> areaS=SortLibrary::HeapSort<double>(v);
                 break;
             }
         }
-   cout<<idPartenza<<endl;
-   ShapeLibrary::Mesh mesh =Mesh(lista);
-   Eigen::MatrixXd matriceAdiacenza = mesh.adiacenza;
+    cout<<idPartenza<<endl;
 
-   //faccio partire il raffinamento
+    //------------------------------------------------------------------
+    //creo l'oggetto della classe mesh passandogli la lista di triangoli
 
+    ShapeLibrary::Mesh mesh =Mesh(lista);
 
+    /*oss: avremmo potuto scrivere direttamente una matrice piena, tuttavia in termini di efficienza fa molta acqua: per ogni triangolo al più potremmo avere al massimo 3 elementi (su 143 ora)
+    * non nulli, quindi un inutile spreco di memoria. Per ovviare a questa cosa generalmente si ricorre alle matrici Sparse (abbiamo visto qualche accenno non troppo
+    * dettagliato nel corso di metodi numerici), l'idea è che siano segnati all'interno di questa matrice fittizia solo i valori non nulli e la posizione all'interno della matrice.
+    * fortunatamente la libreria eigen ha un tipo matrice sparsa, quindi mi aspetto che le operazioni siano tutte ottimizzate. Dobbiamo indagare in merito
+    */
 
+    ////!!!!!
+    //mi salvo la matrice sparsa (in realtà riflettendoci ora, potrebbe non essere necessario definirla nel main questa, perchè mi basterebbe averla all'interno della classe
+    //per poi utilizzarla nelle funzioni, sì mi sembra una scelta migliore, ci dobbiamo ragionare)
+    ///!!!!
 
+    Eigen::SparseMatrix<double> matriceAdiacenza = mesh.adiacenza;
+    //se cancelli questo commento di sotto vedrai che stampa una prima parte dove segna le coppie (indice riga, indice colonna) e poi il valore associato, quindi si stampa la matrice intera con gli zeri
+    //cout<<matriceAdiacenza<<endl;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    //-------------------------------------------
 
 
 
 
   return 0;
 
-
-  ///TEORICAMENTE SE TUTTO VA A BUON FINE IO DOVREI AVERE UN VERTICI TUTTI I VERTICI, IN ARCHI GLI ARCHI E IN TRIANGOLI I TRIANGOLI, ADESSO UNISCO LE INFORMAZIONI DI VERTICI E ARCHI
-  /// DENTRO LA CLASSE MESH, IN MODO DA CREARE LA MATRICE DI ADIACENZA.
-  /// A QUESTO PUNTO SFRUTTO LA MATRICE DI ADIACENZA PER CONTINUARE A LAVORARE
-  /// OSS: POTREI UTILIZZARE IL METODO DERIVATO IN TRIANGOLI PER CALCOLARE LA MATRICE DI ADIACENZA DEI TRIANGOLI (UTILIZZANDO LA RICERCA DEL LATO COMUNE) [VA CAPITO BENE COME IMPLEMENTARE QUESTA COSA]
-  ///
-  //abbiamo importato i dati all'interno di Mesh, ora possiamo ad esempio costruire un grafo prendendo i nodi e gli archi per definire una matrice di adiacenta
-    //potremmo quindi utilizzare una classe di tipo grafo e passargli i punti e gli archi che abbiamo messo in mesh per costruire una matrice di adiacenza
 }
+
+
+
+
+
+
+
 
 /*                                              COSE DA AGGIUNGERE
  *
@@ -131,36 +173,30 @@ vector<double> areaS=SortLibrary::HeapSort<double>(v);
  */
 
 /*                                                              PROBLEMI DA RISOLVERE
- *capire come si fa a settare le tolleranze, basta fare #include file??
- *
- * al momento ImportMesh fallisce la lettura, dobbiamo trovare un modo per fargli leggere il file, penso sia un problema di dove è salvato nella directory;
- *
- *scegliere se mantenere per la mesh la struct definita dalla Teora nell'esercitazione;
- *
- *capire come impostare la classe Triangolo, quali metodi fare;
- *
- *capire se ci serve definire altre classi, come ad esempio triangolo ben posto, triangolo splittato o cose così;
- *
- *scegliere se definire tutto come metodo delle classi (ad esempio impostare un metodo bisezione che calcoli la bisezioneLatoMaggiore) o sfruttare delle funzioni a parte;
  *
  *definire un criterio d'arresto;
  *
  *teoricamente ci sono due file da testare uno nella cartella Dataset/Test1 e uno in Dataset/Test2
  *
- *capire se nel file tolleranza.hpp vado incluso e chiamato il file di sorting, perchè teoricamente per tutte le operazioni che includano l'uso di confronti dovremmo applicare le nuove tolleranze
- *
  *!!! oss: va omologata la lingua per una questione stilistica, quindi se scegliamo di scrivere gli output tutti in inglese vanno fatti tutti in inglese!!
+ *
+ * VA ASSOLUTAMENTE CAPITO COME FUNZIONA IL MARKER PERCHÈ ALLA FINE DEL CODICE NOI VOGLIAMO UN FILE CSV DA EDITARE CON PARAVIEW E QUESTO PRENDE ANCHE IL MARKER
+ *
+ * decidere se il sorting va cambiato come nei commenti
+ *
+ * scegliere se scrivere del codice effettivo nel main, oppure chiamare una funzione e quindi evitare di richiamare la matrice di adiacenza
+ *
 */
 
 
-/*                                                          PROBLEMI RISOLTI DA SEGNALARE
+/*                                                          COSE UTILI
  *
  *per inserire un file nel Header File o nel Source File, aprire il file CMakeList.txt in src (in basso) e scrivere list(APPEND raffinamento_headers ${CMAKE_CURRENT_SOURCE_DIR}/empty_class.hpp) sostituendo i nomi dei file scelti;
  *
  *anche i file da leggere vanno inseriti nel cmakelist quello in alto
  *
  *Per stampare elementi di una mappa
- *  STAMPARE I CONTENUTI DELLA MAPPA
+ *  STAMPARE I CONTENUTI DI UNA MAPPA
   for(auto it = aree.begin(); it != aree.end(); it++)
   {
 
@@ -172,7 +208,13 @@ vector<double> areaS=SortLibrary::HeapSort<double>(v);
   }
 
  *
- *
+ *STAMPARE UNA MATRICE DI
+ *   for (int i = 0; i < matriceAdiacenza.rows(); ++i) {
+           for (int j = 0; j < matriceAdiacenza.cols(); ++j) {
+               cout << matriceAdiacenza(i, j) << " ";
+           }
+           cout << endl;
+       }
  *
  *
  *

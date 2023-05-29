@@ -7,20 +7,6 @@
  * a livello di velocità e di accuratezza come una sorta di errore rispetto allo heapsorting e quindi definire dei pro e dei contro
  */
 
-/* dobbiamo scegliere se utilizzare o meno i templete
- * teoricamente se lo vogliamo fare generico ha senso usare i templeti
- * nell'ottica di risolvere questo file specifico tanto vale passargli un int
- * boh dobbiamo decidere tanto di fatto è pochissima la differenza fra l'uno e l'altro
- */
-
-
-/*
- * per come è implementato questo heapsort prende in input un vettore di dimensione variabile contenente un qualsiasi tipo di funzione (è un templete) e riordina il vettore
- * dal più piccolo al più grande, qualora si voglia implementare dal più grande al più piccolo bisognerebbe attivare decreasing.
- * Dato che a noi serve sempre ordinare dal più grande al più piccolo io opterei per ridefinire direttamente l'algoritmo in modo che ordini dal più grande al più piccolo
-*/
-//OSS ho apportato (e segnalato i vari cambi), ma andrebbe testato per garantirne l'effettivo funzionamento!!!
-
 #include "iostream"
 #include "list"
 #include "Eigen/Eigen"
