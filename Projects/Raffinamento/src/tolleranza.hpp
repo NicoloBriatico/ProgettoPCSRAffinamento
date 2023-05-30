@@ -81,6 +81,7 @@ namespace TolleranzaLibrary
     return !(p1 > p2);
   }
 
+
 //FORSE DOVREMMO INSERIRE IL SORTING PER DARGLI UN DEFINIZIONE DI TOLLERANZA NEL CALCOLO DEL <, >,  =, ECC..-
 
   template<typename T>

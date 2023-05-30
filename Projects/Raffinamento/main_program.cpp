@@ -53,12 +53,10 @@ int main()
      *
      *          SORTING
      *il sorting che ho scritto è quello dell'heapsort dell'esercitazione 6, volendo possiamo sceglierne un'altro
-     *POTREMMO PENSARE DI IMPLEMENTARE DIVERSAMENTE L'HEAPSORT, PERCHÈ COM'È SCRITTO ORA RESTITUISCE UN VETTORE, POTREMMO PENSARE DI FARGLIELO MODIFICARE, MA DOVREMMO ANCHE
-     *CONSIDERARE IL RISCHIO DI FARE UN'OPERAZIONE DEL GENERE!!!!!!!
      *
      *
      *          TOLLERANZA
-     *ho settato le operazioni di tolleranza come nell'esercitazione 8 tipo, ma bisogna creare un collegamento con l'heapsort (forse)
+     *ho settato le operazioni di tolleranza come nell'esercitazione 8 tipo
      *
      *
      *                   LINEA GUIDA
@@ -77,7 +75,7 @@ int main()
     //----------------------------------------------------
 
     //definisco un oggetto di tipo struct
-    TriangularMesh trimesh;       //trimesh mi ricorda un sacco trimon ahahha (mi diverto con poco lo so)
+    TriangularMesh trimesh;       //trimesh mi ricorda un sacco trimon ahahha (mi diverto con poco, lo so)
     //definisco la lista che mi conterrà i triangoli che creerò leggendo il file Cell2d
     vector<ShapeLibrary::Triangle> lista;
 
@@ -117,12 +115,11 @@ int main()
 
     //-----------------------------------------------------------------------
     //ordino la lista, estraggo l'area più grande e attraverso la mappa mi ricollego all'id del triangolo
-
-    vector<double> areaS=SortLibrary::HeapSort<double>(v);
+    v=SortLibrary::HeapSort<double>(v);
     //cerco l'id del primo triangolo
     unsigned int idPartenza;
     for (const auto& coppia : aree) {
-            if (coppia.second == areaS[0]) {
+            if (coppia.second == v[0]) {
                 idPartenza = coppia.first;
                 break;
             }
@@ -132,7 +129,7 @@ int main()
     //------------------------------------------------------------------
     //creo l'oggetto della classe mesh passandogli la lista di triangoli
 
-    ShapeLibrary::Mesh mesh =Mesh(lista);
+    ShapeLibrary::Mesh mesh = Mesh(lista);
 
     /*oss: avremmo potuto scrivere direttamente una matrice piena, tuttavia in termini di efficienza fa molta acqua: per ogni triangolo al più potremmo avere al massimo 3 elementi (su 143 ora)
     * non nulli, quindi un inutile spreco di memoria. Per ovviare a questa cosa generalmente si ricorre alle matrici Sparse (abbiamo visto qualche accenno non troppo
@@ -145,11 +142,17 @@ int main()
     //per poi utilizzarla nelle funzioni, sì mi sembra una scelta migliore, ci dobbiamo ragionare)
     ///!!!!
 
-    Eigen::SparseMatrix<double> matriceAdiacenza = mesh.adiacenza;
+    //Eigen::SparseMatrix<double> matriceAdiacenza = mesh.adiacenza;
+
+
     //se cancelli questo commento di sotto vedrai che stampa una prima parte dove segna le coppie (indice riga, indice colonna) e poi il valore associato, quindi si stampa la matrice intera con gli zeri
     //cout<<matriceAdiacenza<<endl;
 
     //-------------------------------------------
+    //partendo dal triangolo più grande lo raffino
+    Vector2i aggiunta  = lista[idPartenza].Raffina();
+    //adesso ho il punto aggiunto, verifico se è ben posto
+    mesh.Verifica(idPartenza,aggiunta);
 
 
 
@@ -165,7 +168,7 @@ int main()
 
 
 
-/*                                              COSE DA AGGIUNGERE
+/*                                                               COSE DA AGGIUNGERE
  *
  * test per il calcolo dell'area della classe triangolo
  *
@@ -182,9 +185,12 @@ int main()
  *
  * VA ASSOLUTAMENTE CAPITO COME FUNZIONA IL MARKER PERCHÈ ALLA FINE DEL CODICE NOI VOGLIAMO UN FILE CSV DA EDITARE CON PARAVIEW E QUESTO PRENDE ANCHE IL MARKER
  *
- * decidere se il sorting va cambiato come nei commenti
- *
  * scegliere se scrivere del codice effettivo nel main, oppure chiamare una funzione e quindi evitare di richiamare la matrice di adiacenza
+ *
+ *problema per esportare i file, come aggiungiamo i triangoli? modifichiamo quelli già esistenti?
+ *potremmo segnarci su quali triangoli siamo stati e quindi una volta portato a termine il raffinamento cancellare i triangoli?
+ *
+ *
  *
 */
 

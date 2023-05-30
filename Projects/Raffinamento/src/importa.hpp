@@ -18,16 +18,16 @@ using namespace ShapeLibrary;
 
 
 //prende in input anche la lista di triangoli che sarà utile per l'import dati del file cell2d
-bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista);
+bool ImportMesh(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista);
 
 bool ImportCell0Ds(TriangularMesh& mesh);
 
 bool ImportCell1Ds(TriangularMesh& mesh);
 
-bool ImportCell2Ds(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista);
+bool ImportCell2Ds(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista);
 
 // ***************************************************************************
-bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista)
+bool ImportMesh(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista)
 {
 
   if(!ImportCell0Ds(mesh))
@@ -111,6 +111,7 @@ bool ImportMesh(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista
   return true;
 
 }
+///anche questa parte si può parallelizzare
 
 // ***************************************************************************
 bool ImportCell0Ds(TriangularMesh& mesh)
@@ -222,7 +223,7 @@ bool ImportCell1Ds(TriangularMesh& mesh)
   return true;
 }
 // ***************************************************************************
-bool ImportCell2Ds(TriangularMesh& mesh, std::vector<ShapeLibrary::Triangle>& lista)
+bool ImportCell2Ds(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista)
 {
   ifstream file;
   file.open("./Cell2Ds.csv");

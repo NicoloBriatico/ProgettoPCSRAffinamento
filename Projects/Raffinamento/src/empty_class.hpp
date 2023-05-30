@@ -32,10 +32,11 @@ namespace ShapeLibrary {
     //attenzione che andrebbero messi in ordine gli attributi così come glieli passo, infatti mi da un warning -Wreorder
     private:
       array<unsigned int, 3> vertices;
-      TriangularMesh& mesh ;
+
       Eigen::MatrixXd coordinate;
 
     public:
+      TriangularMesh& mesh ;
       unsigned int id;
       array<unsigned int, 3> edges;
       Triangle() = default;
@@ -46,8 +47,8 @@ namespace ShapeLibrary {
       double Area();
       //metodo che dato un triangolo restituisce se presente, il lato adiacente
       int Vicini(ShapeLibrary::Triangle& triangolo2);
-
-      //vector<int> Raffina();
+      //raffino il triangolo
+      Vector2i Raffina();
 
   };
 
@@ -70,7 +71,7 @@ namespace ShapeLibrary {
       //definisco i metodi
       ///aggiungo un triangolo alla mesh
       /// verifico la buona positura della mesh (qui devo richiamare il metodo di raffinamento della classe triangolo
-      //bool Verifica();
+      void Verifica(unsigned int& idPartenza ,Vector2i& aggiunta  );
 
 
   };
