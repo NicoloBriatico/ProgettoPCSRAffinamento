@@ -10,73 +10,107 @@ using namespace Eigen;
 using namespace std;
 
 namespace ShapeLibrary {
+template<typename T>
+T id2object(unsigned int& id, vector<T>& vertici)
+{
+    for (unsigned int i=0; i< vertici.size();i++)
+    {
+        if (vertici[i].id ==id)
+            return vertici[i];
+    }
+    T nullo;
+    return nullo;
+}
+
 
 //struct per le informazioni su vertici e lati
-    struct TriangularMesh
-    {
-        unsigned int NumberCell0D = 0; ///< number of Cell0D
-        vector<unsigned int> Cell0DId = {}; ///< Cell0D id, size 1 x NumberCell0D
-        vector<Vector2d> Cell0DCoordinates = {}; ///< Cell0D coordinates, size 2 x NumberCell0D (x,y)
-        map<unsigned int, list<unsigned int>> Cell0DMarkers = {}; ///< Cell0D markers, size 1 x NumberCell0D (marker)
 
-        unsigned int NumberCell1D = 0; ///< number of Cell1D
-        vector<unsigned int> Cell1DId = {}; ///< Cell1D id, size 1 x NumberCell1D
-        vector<Vector2i> Cell1DVertices = {}; ///< Cell1D vertices indices, size 2 x NumberCell1D (fromId,toId)
-        map<unsigned int, list<unsigned int>> Cell1DMarkers = {}; ///< Cell1D propertoes, size 1 x NumberCell1D (marker)
+  class Vertice
+   {
+    public:
+
+       unsigned int id;
+       unsigned int marker;
+       double x;
+       double y;
+
+
+       Vertice() = default;
+       //al costruttore passo id, vertici, lati e struct e lui mi salva le informazioni e in più definisce le coordinate (derivandole dalla struct)
+       Vertice(const unsigned int& id,const unsigned int& marker,const double& x, const double& y );
+
 
     };
+
+   class Arco
+   {
+    public:
+
+      unsigned int id;
+      unsigned int marker;
+      ShapeLibrary::Vertice inizio;
+      ShapeLibrary::Vertice fine;
+      double lunghezza;
+
+
+      Arco() = default;
+      //al costruttore passo id, vertici, lati e struct e lui mi salva le informazioni e in più definisce le coordinate (derivandole dalla struct)
+      Arco(const unsigned int& id,const unsigned int& marker, ShapeLibrary::Vertice& inizio, ShapeLibrary::Vertice& fine);
+      void CalcolaLunghezza();
+      ShapeLibrary::Vertice CalcolaPuntoMedio(const unsigned int& newIdVert);
+    };
+
 
 //classe triangolo per le informazioni sui triangoli della mesh
   class Triangle
   {
-    //attenzione che andrebbero messi in ordine gli attributi così come glieli passo, infatti mi da un warning -Wreorder
-    private:
-      array<unsigned int, 3> vertices;
-
-      Eigen::MatrixXd coordinate;
+    //attenzione che andrebbero messi in ordine gli attributi così come glieli passo, infatti mi da un warning -Wreord
 
     public:
-      TriangularMesh& mesh ;
+
       unsigned int id;
-      array<unsigned int, 3> edges;
+      array<ShapeLibrary::Vertice, 3> vertices;
+      array<ShapeLibrary::Arco, 3> edges;
+      double area;
+
+      //vector<ShapeLibrary::Triangle> vicini;
+
       Triangle() = default;
       //al costruttore passo id, vertici, lati e struct e lui mi salva le informazioni e in più definisce le coordinate (derivandole dalla struct)
-      Triangle(unsigned int& id, array<unsigned int, 3>& vertices, array<unsigned int, 3>& edges, TriangularMesh& mesh);
+      Triangle(const unsigned int& id, array<ShapeLibrary::Vertice, 3>& vertices, array<ShapeLibrary::Arco, 3>& edges);
 
-      //metodo che restituisce il valore dell'area del triangolo
-      double Area();
-      //metodo che dato un triangolo restituisce se presente, il lato adiacente
-      int Vicini(ShapeLibrary::Triangle& triangolo2);
-      //raffino il triangolo
-      Vector2i Raffina();
+      void CalcolaArea();
+      void isVicino(ShapeLibrary::Triangle& triangolo2, Eigen::SparseMatrix<unsigned int>& adiacenza);
+      ShapeLibrary::Vertice VerticeOpposto(ShapeLibrary::Arco& arco);
+      tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco>  Raffina(const unsigned int& newIdEdges, const unsigned int& newIdVert);
 
   };
 
-
-  //classe che definisce la mesh come insieme di triangoli
   class Mesh
   {
-    private:
-      vector<ShapeLibrary::Triangle> lista;
+  //private:
 
-
-    public:
-      // l'ho messa pubblica nell'ottica di farne un accesso nel main, ma considerando il commento scritto, forse ha più senso metterlo fra i privati
-      Eigen::SparseMatrix<double> adiacenza;
-
+  public:
+      vector<ShapeLibrary::Triangle> triangoli;
+      vector<ShapeLibrary::Arco> archi;
+      vector<ShapeLibrary::Vertice> vertici;
+      Eigen::SparseMatrix<unsigned int> adiacenza;
       Mesh() = default;
-      //prende in input tutti i triangoli e costruisce la matrice di adiacenza
-      Mesh(vector<ShapeLibrary::Triangle>& lista);
-
-      //definisco i metodi
-      ///aggiungo un triangolo alla mesh
-      /// verifico la buona positura della mesh (qui devo richiamare il metodo di raffinamento della classe triangolo
-      void Verifica(unsigned int& idPartenza ,Vector2i& aggiunta  );
-
+      Mesh(vector<ShapeLibrary::Triangle>& triangoli,vector<ShapeLibrary::Arco>& archi,vector<ShapeLibrary::Vertice>& vertici);
+      void CalcolaMatriceAdiacenza();
+      unsigned int NuovoIdVertice();
+      unsigned int NuovoIdArco();
+      unsigned int NuovoIdTriangolo();
+      unsigned int Trova(unsigned int& col, unsigned int& valore);
+      void CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLibrary::Arco& arcoVecchio);
+      ShapeLibrary::Arco CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Vertice& nodo2);
+      void InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& arco, ShapeLibrary::Vertice& nodo3);
+      //void CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza);
+      void Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoNuovo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio);
+      void RaffinamentoStart();
+      //void Esporta();
 
   };
-
-
 }
 
 

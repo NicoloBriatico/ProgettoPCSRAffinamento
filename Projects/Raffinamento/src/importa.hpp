@@ -17,104 +17,43 @@ using namespace Eigen;
 using namespace ShapeLibrary;
 
 
-//prende in input anche la lista di triangoli che sarà utile per l'import dati del file cell2d
-bool ImportMesh(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista);
+//*************************************************************
+bool ImportMesh(vector<ShapeLibrary::Vertice>& vertici,vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Triangle>& triangoli);
 
-bool ImportCell0Ds(TriangularMesh& mesh);
+bool ImportCell0Ds(vector<ShapeLibrary::Vertice>& vertici);
 
-bool ImportCell1Ds(TriangularMesh& mesh);
+bool ImportCell1Ds(vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Vertice>& vertici);
 
-bool ImportCell2Ds(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista);
+bool ImportCell2Ds(vector<ShapeLibrary::Triangle>& lista, vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Vertice>& vertici);
 
 // ***************************************************************************
-bool ImportMesh(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista)
+bool ImportMesh(vector<ShapeLibrary::Vertice>& vertici,vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Triangle>& triangoli)
 {
 
-  if(!ImportCell0Ds(mesh))
+  if(!ImportCell0Ds(vertici))
   {
     return false;
   }
+    //TODO FARE I TEST
 
-  /* TEST PER VEDERE SE FUNZIONA
-  else
-  {
-    cout << "Cell0D marker:" << endl;
-    for(auto it = mesh.Cell0DMarkers.begin(); it != mesh.Cell0DMarkers.end(); it++)
-    {
-
-      cout << "key:\t" << it -> first << "\t values:";
-      for(const unsigned int id : it -> second)
-        cout << "\t" << id;
-
-      cout << endl;
-
-    }
-  }*/
-
-  if(!ImportCell1Ds(mesh))
+  if(!ImportCell1Ds(archi, vertici))
   {
     return false;
   }
+//TODO FARE I TEST
 
-  /* TEST PER VEDERE SE FUNZIONA
-  else
-  {
-    cout << "Cell1D marker:" << endl;
-    for(auto it = mesh.Cell1DMarkers.begin(); it != mesh.Cell1DMarkers.end(); it++)
-    {
-      cout << "key:\t" << it -> first << "\t values:";
-      for(const unsigned int id : it -> second)
-        cout << "\t" << id;
-
-      cout << endl;
-    }
-  }*/
-
-
-  if(!ImportCell2Ds(mesh, lista))
+  if(!ImportCell2Ds(triangoli, archi, vertici))
   {
     return false;
   }
-
-  //TEST PER VEDERE SE FUNZIONA (andrebbe cambiato considerando l'accesso agli elementi di una classe e non più alla struct)
-  /*else
-  {
-    // Test:
-    for(unsigned int c = 0; c < mesh.NumberCell2D; c++)
-    {
-      array<unsigned int, 3> edges = mesh.Cell2DEdges[c];
-
-      for(unsigned int e = 0; e < 3; e++)
-      {
-         const unsigned int origin = mesh.Cell1DVertices[edges[e]][0];
-         const unsigned int end = mesh.Cell1DVertices[edges[e]][1];
-
-         auto findOrigin = find(mesh.Cell2DVertices[c].begin(), mesh.Cell2DVertices[c].end(), origin);
-         if(findOrigin == mesh.Cell2DVertices[c].end())
-         {
-           cerr << "Wrong mesh" << endl;
-           return 2;
-         }
-
-         auto findEnd = find(mesh.Cell2DVertices[c].begin(), mesh.Cell2DVertices[c].end(), end);
-         if(findEnd == mesh.Cell2DVertices[c].end())
-         {
-           cerr << "Wrong mesh" << endl;
-           return 3;
-         }
-         //cout << "c: " << c << ", origin: " << *findOrigin << ", end: " << *findEnd << endl;
-
-      }
-    }
-  }*/
-
+//TODO FARE I TEST
   return true;
 
 }
-///anche questa parte si può parallelizzare
+
 
 // ***************************************************************************
-bool ImportCell0Ds(TriangularMesh& mesh)
+bool ImportCell0Ds(vector<ShapeLibrary::Vertice>& vertici)
 {
 
   ifstream file;
@@ -132,44 +71,32 @@ bool ImportCell0Ds(TriangularMesh& mesh)
 
   listLines.pop_front();
 
-  mesh.NumberCell0D = listLines.size();
+  unsigned int NumberCell0D = listLines.size();
 
-  if (mesh.NumberCell0D == 0)
+  if (NumberCell0D == 0)
   {
     cerr << "There is no cell 0D" << endl;
     return false;
   }
-
-  mesh.Cell0DId.reserve(mesh.NumberCell0D);
-  mesh.Cell0DCoordinates.reserve(mesh.NumberCell0D);
-
+    cout<<"Cell0d"<<endl;
   for (const string& line : listLines)
   {
     istringstream converter(line);
+    ShapeLibrary::Vertice nodo;
 
-    unsigned int id;
-    unsigned int marker;
-    Vector2d coord;
 
-    converter >>  id >> marker >> coord(0) >> coord(1);
+    converter >>  nodo.id >> nodo.marker >> nodo.x >> nodo.y;
 
-    mesh.Cell0DId.push_back(id);
-    mesh.Cell0DCoordinates.push_back(coord);
+    cout<<nodo.id <<"\t"<< nodo.marker <<"\t"<<nodo.x <<"\t"<<nodo.y<<endl;
 
-    if( marker != 0)
-    {
-      if (mesh.Cell0DMarkers.find(marker) == mesh.Cell0DMarkers.end())
-        mesh.Cell0DMarkers.insert({marker, {id}});
-      else
-        mesh.Cell0DMarkers[marker].push_back(id);
-    }
+    vertici.push_back(nodo);
 
   }
-  file.close();
+
   return true;
 }
 // ***************************************************************************
-bool ImportCell1Ds(TriangularMesh& mesh)
+bool ImportCell1Ds(vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Vertice>& vertici)
 {
 
   ifstream file;
@@ -184,46 +111,38 @@ bool ImportCell1Ds(TriangularMesh& mesh)
     listLines.push_back(line);
 
   listLines.pop_front();
+  file.close();
 
-  mesh.NumberCell1D = listLines.size();
+  unsigned int NumberCell1D = listLines.size();
 
-  if (mesh.NumberCell1D == 0)
+  if (NumberCell1D == 0)
   {
     cerr << "There is no cell 1D" << endl;
     return false;
   }
-
-  mesh.Cell1DId.reserve(mesh.NumberCell1D);
-  mesh.Cell1DVertices.reserve(mesh.NumberCell1D);
-
+    cout<<"cell1d"<<endl;
   for (const string& line : listLines)
   {
     istringstream converter(line);
+    ShapeLibrary::Arco arco;
+    unsigned int size_unsigned_int;
+    converter >>  arco.id >> arco.marker>>size_unsigned_int;
+    //cout<<size_unsigned_int<<endl;
+    arco.inizio = id2object( size_unsigned_int, vertici);
+    converter >> size_unsigned_int;
+    //cout<<size_unsigned_int<<endl;
+    arco.fine = id2object(size_unsigned_int, vertici);
+    cout<<arco.id <<"\t"<< arco.marker <<"\t"<<arco.inizio.id <<"\t"<<arco.fine.id<<endl;
+    archi.push_back(arco);
 
-    unsigned int id;
-    unsigned int marker;
-    Vector2i vertices;
-
-    converter >>  id >> marker >> vertices(0) >> vertices(1);
-
-    mesh.Cell1DId.push_back(id);
-    mesh.Cell1DVertices.push_back(vertices);
-
-    if( marker != 0)
-    {
-      if (mesh.Cell1DMarkers.find(marker) == mesh.Cell1DMarkers.end())
-        mesh.Cell1DMarkers.insert({marker, {id}});
-      else
-        mesh.Cell1DMarkers[marker].push_back(id);
-    }
   }
 
-  file.close();
+
 
   return true;
 }
 // ***************************************************************************
-bool ImportCell2Ds(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista)
+bool ImportCell2Ds(vector<ShapeLibrary::Triangle>& triangoli,vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Vertice>& vertici)
 {
   ifstream file;
   file.open("./Cell2Ds.csv");
@@ -238,6 +157,8 @@ bool ImportCell2Ds(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista)
 
   listLines.pop_front();
 
+  file.close();
+
   unsigned int NumberCell2D = listLines.size();
 
   if (NumberCell2D == 0)
@@ -245,27 +166,33 @@ bool ImportCell2Ds(TriangularMesh& mesh, vector<ShapeLibrary::Triangle>& lista)
     cerr << "There is no cell 2D" << endl;
     return false;
   }
+  cout<<"Cell2d"<<endl;
 
   for (const string& line : listLines)
   {
     istringstream converter(line);
+    ShapeLibrary::Triangle triangolo;
 
-    unsigned int id;
-    array<unsigned int, 3> vertices;
-    array<unsigned int, 3> edges;
+    array<unsigned int,3> vett;
 
-    converter >>  id;
-
-    for(unsigned int i = 0; i < 3; i++)
-      converter >> vertices[i];
+    converter >>  triangolo.id;
 
     for(unsigned int i = 0; i < 3; i++)
-      converter >> edges[i];
+    {
+        converter >> vett[i];
+      triangolo.vertices[i] = id2object( vett[i], vertici);
+    }
 
 
-    //costruisco il triangolo
-    ShapeLibrary::Triangle triangolo = ShapeLibrary::Triangle(id, vertices, edges, mesh);
-    lista.push_back(triangolo);
+    for(unsigned int i = 0; i < 3; i++)
+    {
+        converter >> vett[i];
+      triangolo.edges[i] = id2object(vett[i], archi);
+    }
+
+
+    cout<<triangolo.id <<"\t"<< triangolo.vertices[0].id<<"\t"<< triangolo.vertices[1].id<<"\t"<< triangolo.vertices[2].id<<"\t"<< triangolo.edges[0].id<<"\t"<< triangolo.edges[1].id<<"\t"<< triangolo.edges[2].id<<endl;
+    triangoli.push_back(triangolo);
 
   }
   file.close();

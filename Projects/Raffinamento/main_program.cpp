@@ -12,150 +12,77 @@
 #include "empty_class.hpp"
 
 
-/*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA     */
+/*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA
+        DOVREMMO TESTARE ANCHEE LA TOLLERANZA
+*/
 
 
 using namespace std;
 // ***************************************************************************
 int main()
 {
-
     /*
-     *                  INFO/PAZZIA
-     *La mia idea pazza, una volta terminata la stesura del progetto è quella di stressare il più possibile il codice per verificarne il buon funzionamento e l'ottimizzazione delle parti
-     *ovvero cercare/creare una mesh moooooooooooolto grande e vedere se continua a funzionare e quindi proporre come possibile soluzione (e confronto) l'uso di codice parallelizzato
-     *questa cosa potrebbe tornarci comoda nell'ottica della relazione e poi mi eccita tantissimo parallelizzare il codice ahhah.
-     *Detto questo, questa parte esce un po' fuori dalle richieste del progetto ed è penso notevolmente complicata (la parallelllizzazione), quindi fai finta di niente.
-     *Ogni tanto all'interno del codice potresti trovare tipo ///questo codice si può parallelizzare m, che sono dei remarker per me qualora volessimo implementare la parallellizzazione
-     *
-     *
-     *                     STRUTTURE DATI
-     * - LA STRUCT (vedi "empty_class.hpp") è come quella impostata dalla Teora, manca dell'ultima parte (Cell2d), che è stata sostituita dalla classe Triangle. Vengono Cell0d e cell1d vengono letti come
-     * aveva implementato la Teora, il file Cell2d ha la stessa implementazione della Teora, ma viene memorizzato in un oggetto della classe triangolo (vedi "importa.hpp")
-     *
-     * -è stata ristrutturata la classe TRIANGLE: è una classe senza figli o padre, prende in input le informazioni del file cell2d e costruisce una matrice con le coordinate (estratte
-     * dalla struct), che ci consente di calcolare agilmente l'area con il metodo di Gauss;
-     * metodi implementati:
-     *    . area del triangolo
-     *    . Vicini (no, non parlo del prof)
-     *Da implementare:
-     *      .Dimezza
-     *Per informazioni più dettagliate vedi "empty_class.hpp"
-     *
-     *- è stata ristrutturata la classe MESH: è una classe senza padre o figli (per ora), prende in input un vettore di oggetti appartenti alla classe triangolo e calcola
-     *subito una matrice di Adiacenza ATTENZIONE!!!! PER LA MATRICE DI ADIACENZA HO OPTATO PER UNA MATRICE SPARSA (QUINDI NON UNA MATRICE COMPLETA) PER QUESTIONI DI EFFICIENZA
-     *metodi implementati:
-     *          .
-     *metodi da implementare:
-     *          . aggiunta di un triangolo alla matrice di adiacenza
-     *          .verifica della buona positura di una mesh
-     *
-     *
-     *          SORTING
-     *il sorting che ho scritto è quello dell'heapsort dell'esercitazione 6, volendo possiamo sceglierne un'altro
-     *
-     *
-     *          TOLLERANZA
-     *ho settato le operazioni di tolleranza come nell'esercitazione 8 tipo
-     *
-     *
-     *                   LINEA GUIDA
-     * -LEGGERE I FILE E SALVARE I CONTENUTI
-     * -CALCOLARE LE AREE DEI TRIANGOLI E SALVARLE IN UN FILE
-     * -CREARE LA MESH DI PARTENZA
-     * -TROVARE IL TRIANGOLO PIÙ GRANDE <-NOI SIAMO QUI ORA
-     * -RAFFINARE IL TRIANGOLO
-     * -VERIFICARE CHE LA MESH SIA BEN POSTA
-     * -ESPORTARE IL FILE
-     */
-
+    LINEA GUIDA
+        * -LEGGERE I FILE E SALVARE I CONTENUTI
+        * -CALCOLARE LE AREE DEI TRIANGOLI
+        * -TROVARE IL TRIANGOLO PIÙ GRANDE
+        * -CREARE LA MESH DI PARTENZA
+        * -RAFFINARE IL TRIANGOLO
+        * -VERIFICARE CHE LA MESH SIA BEN POSTA     <-NOI SIAMO QUI ORA
+        * -ESPORTARE IL FILE
+    */
 
     /*      VA SETTATA LA TOLLERANZA INIZIALE       */
 
     //----------------------------------------------------
 
-    //definisco un oggetto di tipo struct
-    TriangularMesh trimesh;       //trimesh mi ricorda un sacco trimon ahahha (mi diverto con poco, lo so)
-    //definisco la lista che mi conterrà i triangoli che creerò leggendo il file Cell2d
-    vector<ShapeLibrary::Triangle> lista;
+    //imposto una percentuale di triangoli da considerare
+    double theta = 0.5;
 
-    if(!ImportMesh(trimesh, lista))
+    vector<ShapeLibrary::Arco> archi;
+    vector<ShapeLibrary::Vertice> vertici;
+    vector<ShapeLibrary::Triangle> triangoli;
+
+    if(!ImportMesh(vertici,archi, triangoli))
     {
     return 1;
     }
 
-    /*arrivato a questo punto ho:
-    *-trimesh contente le informazioni su vertici e archi;
-    *-lista contente oggetti di tipo triangolo, ciascuno contente informazioni sui triangoli
-    */
-
-    //--------------------------------------------------------
-
-    //osservazione: ho messo tutti i triangoli in una lista per due motivi
-    //1) mi servono per creare l'oggetto nella classe mesh;
-    //2) li ho creati in una funzione, ha senso salvarli perchè tanto mi serviranno di nuovo.
-
-
-
-    ///per esempio potrei parallelizzare questa cosa///
-    //definisco questa mappa che associerà all'id del triangolo la sua area
-    map<int, double> aree = {};
-    //v vettore temporaneo per ordinare le aree
-    //per esempio qui sarebbe carino se riuscissimo ad evitare di creare un vettore così e passare direttamente a heapSort un vettore di aree (però per ora così funziona)
-    vector<double> v= {};
+    //------------------------------------------------------------
 
     //calcolo le aree dei triangoli
-    for(unsigned int i=0; i< lista.size();i++)
+
+    /*cout<<"\nid e aree:"<<endl;
+    for (unsigned int i=0; i<triangoli.size();i++)
     {
-        double area =lista[i].Area();
-        //inserisco id e area nella mappa, solo l'area nella lista
-        aree.insert({lista[i].id, area});
-        v.push_back(area);
+        //calcolo l'area di tutti i triangoli
+        triangoli[i].CalcolaArea();
+        cout<<triangoli[i].id<<"\t"<<triangoli[i].area<<endl;
+    }
+    cout<<endl;
+    //ordino i triangoli per area
+    triangoli = SortLibrary::HeapSort(triangoli, &ShapeLibrary::Triangle::area);
+    cout<<"triangolo con area più grande:\n"<<triangoli[0].id<<"\t"<<triangoli[0].area<<endl;
+*/
+    //------------------------------------------------------------
+
+    //mi costruisco un oggetto in classe mesh
+    ShapeLibrary::Mesh mesh = Mesh(triangoli, archi, vertici);
+    mesh.CalcolaMatriceAdiacenza();
+    //cout<<mesh.adiacenza<<endl;
+
+    //-----------------------------------------------------------
+
+    unsigned int numTriPartenza = triangoli.size();
+    while(numTriPartenza>mesh.triangoli.size()*theta)
+    {
+
+        mesh.RaffinamentoStart();
+        //mesh.RaffinamentoStart();
+        //dovrei aggiornare la matrice di adiacenza
     }
 
-    //-----------------------------------------------------------------------
-    //ordino la lista, estraggo l'area più grande e attraverso la mappa mi ricollego all'id del triangolo
-    v=SortLibrary::HeapSort<double>(v);
-    //cerco l'id del primo triangolo
-    unsigned int idPartenza;
-    for (const auto& coppia : aree) {
-            if (coppia.second == v[0]) {
-                idPartenza = coppia.first;
-                break;
-            }
-        }
-    cout<<idPartenza<<endl;
-
-    //------------------------------------------------------------------
-    //creo l'oggetto della classe mesh passandogli la lista di triangoli
-
-    ShapeLibrary::Mesh mesh = Mesh(lista);
-
-    /*oss: avremmo potuto scrivere direttamente una matrice piena, tuttavia in termini di efficienza fa molta acqua: per ogni triangolo al più potremmo avere al massimo 3 elementi (su 143 ora)
-    * non nulli, quindi un inutile spreco di memoria. Per ovviare a questa cosa generalmente si ricorre alle matrici Sparse (abbiamo visto qualche accenno non troppo
-    * dettagliato nel corso di metodi numerici), l'idea è che siano segnati all'interno di questa matrice fittizia solo i valori non nulli e la posizione all'interno della matrice.
-    * fortunatamente la libreria eigen ha un tipo matrice sparsa, quindi mi aspetto che le operazioni siano tutte ottimizzate. Dobbiamo indagare in merito
-    */
-
-    ////!!!!!
-    //mi salvo la matrice sparsa (in realtà riflettendoci ora, potrebbe non essere necessario definirla nel main questa, perchè mi basterebbe averla all'interno della classe
-    //per poi utilizzarla nelle funzioni, sì mi sembra una scelta migliore, ci dobbiamo ragionare)
-    ///!!!!
-
-    //Eigen::SparseMatrix<double> matriceAdiacenza = mesh.adiacenza;
-
-
-    //se cancelli questo commento di sotto vedrai che stampa una prima parte dove segna le coppie (indice riga, indice colonna) e poi il valore associato, quindi si stampa la matrice intera con gli zeri
-    //cout<<matriceAdiacenza<<endl;
-
-    //-------------------------------------------
-    //partendo dal triangolo più grande lo raffino
-    Vector2i aggiunta  = lista[idPartenza].Raffina();
-    //adesso ho il punto aggiunto, verifico se è ben posto
-    mesh.Verifica(idPartenza,aggiunta);
-
-
-
+    //mesh.Esporta();
 
   return 0;
 
@@ -166,62 +93,3 @@ int main()
 
 
 
-
-
-/*                                                               COSE DA AGGIUNGERE
- *
- * test per il calcolo dell'area della classe triangolo
- *
- *
- */
-
-/*                                                              PROBLEMI DA RISOLVERE
- *
- *definire un criterio d'arresto;
- *
- *teoricamente ci sono due file da testare uno nella cartella Dataset/Test1 e uno in Dataset/Test2
- *
- *!!! oss: va omologata la lingua per una questione stilistica, quindi se scegliamo di scrivere gli output tutti in inglese vanno fatti tutti in inglese!!
- *
- * VA ASSOLUTAMENTE CAPITO COME FUNZIONA IL MARKER PERCHÈ ALLA FINE DEL CODICE NOI VOGLIAMO UN FILE CSV DA EDITARE CON PARAVIEW E QUESTO PRENDE ANCHE IL MARKER
- *
- * scegliere se scrivere del codice effettivo nel main, oppure chiamare una funzione e quindi evitare di richiamare la matrice di adiacenza
- *
- *problema per esportare i file, come aggiungiamo i triangoli? modifichiamo quelli già esistenti?
- *potremmo segnarci su quali triangoli siamo stati e quindi una volta portato a termine il raffinamento cancellare i triangoli?
- *
- *
- *
-*/
-
-
-/*                                                          COSE UTILI
- *
- *per inserire un file nel Header File o nel Source File, aprire il file CMakeList.txt in src (in basso) e scrivere list(APPEND raffinamento_headers ${CMAKE_CURRENT_SOURCE_DIR}/empty_class.hpp) sostituendo i nomi dei file scelti;
- *
- *anche i file da leggere vanno inseriti nel cmakelist quello in alto
- *
- *Per stampare elementi di una mappa
- *  STAMPARE I CONTENUTI DI UNA MAPPA
-  for(auto it = aree.begin(); it != aree.end(); it++)
-  {
-
-    cout << "key:\t" << it -> first << "\t values:"<<it -> second;
-    //for(const unsigned int id : it -> second)
-      //cout << "\t" << id;
-
-    cout << endl;
-  }
-
- *
- *STAMPARE UNA MATRICE DI
- *   for (int i = 0; i < matriceAdiacenza.rows(); ++i) {
-           for (int j = 0; j < matriceAdiacenza.cols(); ++j) {
-               cout << matriceAdiacenza(i, j) << " ";
-           }
-           cout << endl;
-       }
- *
- *
- *
-*/

@@ -87,22 +87,7 @@ namespace TolleranzaLibrary
   template<typename T>
   vector<T> HeapSort(const vector<T>& v);
 
-  /*non credo che queste funzioni ci servano*/
 
-  /*bool UpperLine(const Point& p1,
-                 const Point& p2,
-                 const Point& p3);
-
-  void MergeHulls(vector<Point>& sortedV,
-                  const unsigned int& cx);
-
-
-  void MergeHull(vector<Point>& sortedV,
-                 const unsigned int& sx,
-                 const unsigned int& dx);
-
-  vector<Point> ConvexHull(vector<Point> points);
-*/
 
 }
 

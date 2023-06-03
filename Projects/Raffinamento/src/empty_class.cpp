@@ -9,271 +9,456 @@ using namespace std;
 
 namespace ShapeLibrary {
 
-inline double distanza(const double& x1, const double& y1,const double& x2, const double& y2)
-{
-  return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+
+
+Vertice::Vertice(const unsigned int& id,  const unsigned int& marker, const double& x, const double& y): id(id), marker(marker),x(x), y(y) {}
+
+
+
+Arco::Arco(const unsigned int& id,const unsigned int& marker, ShapeLibrary::Vertice& inizio,ShapeLibrary::Vertice& fine): id(id), marker(marker),inizio(inizio), fine(fine){}
+
+void Arco::CalcolaLunghezza(){
+    lunghezza = sqrt((inizio.x-fine.x)*(inizio.x-fine.x)+(inizio.y-fine.y)*(inizio.y-fine.y));
 }
 
-//il costruttore di triangoli prende in input le info del file e le salva, in più deriva le coordinate dai vertici
-Triangle::Triangle(unsigned int& id, array<unsigned int, 3>& vertices, array<unsigned int, 3>& edges, TriangularMesh& mesh):
-    id(id),
-    vertices(vertices),
-    edges(edges),
-    mesh(mesh){
-
-    //associo i vertici alle coordinate: prima riga le x, seconda riga le y
-    Eigen::MatrixXd coordinates = Eigen::MatrixXd::Zero(2,3);
-    for (unsigned int i=0; i<3;i++){
-        unsigned int j = vertices[i];
-        float coordx =mesh.Cell0DCoordinates[j][0];
-        float coordy =mesh.Cell0DCoordinates[j][1];
-        coordinates(0,i) = coordx;
-        coordinates(1,i) = coordy;
-        }
-    coordinate = coordinates;
+ShapeLibrary::Vertice Arco::CalcolaPuntoMedio(const unsigned int& newIdVert){
+    //accedo alle coordinate dei punti che definisco il lato e calcolo il punto medio
+    ShapeLibrary::Vertice puntoMedio;
+    puntoMedio.id = newIdVert ;
+    puntoMedio.marker = marker;
+    puntoMedio.x = (inizio.x+fine.x)/2;
+    puntoMedio.y = (inizio.y+fine.y)/2;
+    return puntoMedio;
 
 }
 
-//definisco il metodo per il calcolo delle aree
-double Triangle::Area()
-{
-    //devo tenere conto che la matrice con le coordinate è già salvata, quindi posso farne accesso anche senza chiamarla esplicitamente
 
-    double area = 0.0;
-    //unsigned int righe = points.rows();
-    unsigned int colonne  = coordinate.cols();
-    for (unsigned int j=0; j< colonne; j++)
+
+
+Triangle::Triangle(const unsigned int& id,array<ShapeLibrary::Vertice,3>& vertices,array<ShapeLibrary::Arco,3>& edges): id(id), vertices(vertices),edges(edges){}
+
+void Triangle::CalcolaArea(){
+    //calcolo l'area con il metodo di Gauss
+    double Area = 0.0;
+
+    for (unsigned int j=0; j<3; j++)
     {
         //y del punto
-        double y_att = coordinate(1,j);
+        double y_att = vertices[j].y;
         //x precedente
-        double x_pre = coordinate(0,((j-1+colonne)%(colonne)));
+        double x_pre = vertices[(j-1+3)%3].x;
         //x successivo
-        double x_succ = coordinate(0,((j+1+colonne)%(colonne)));
-        area += y_att*(x_pre-x_succ);
+        double x_succ = vertices[(j+1+3)%3].x;
+        Area += y_att*(x_pre-x_succ);
     };
-    area = 0.5*area;
+    Area *= 0.5;
 
     //uso la formula di Gauss: semi somma delle coordinate y*(xprecedente -x successivo in senso antiorario)
-    return abs(area);
+    area = abs(Area);
 }
 
+void Triangle::isVicino(ShapeLibrary::Triangle& triangolo2,Eigen::SparseMatrix<unsigned int>& adiacenza){
 
-int Triangle::Vicini(ShapeLibrary::Triangle& triangolo2)
-{
-    //partendo dal presupposto che due triangolo possono avere al massimo un lato in comune:
-    //controllo se il triangolo1 e il 2 sono adiacenti verificando se hanno un lato in comune
-
-    //OSSERVAZIONE: anche se non dovrebbe mai capitare, secondo me sarebbe opportuno verificare che non vengano avanzate proposte di confronto fra due triangoli uguali
-    //dovremmo quindi controllare che l'id del triangolo che stiamo valutando sia diverso dall'id del traingolo2
     for(unsigned int i=0; i<3; i++)
-    {
-        int lato1= edges[i];
-
-        for (unsigned int j=0;j<3;j++)
-        {
-            int lato2= triangolo2.edges[j];
-            if (lato2==lato1)
-                return lato2;
-        }
-    }
-    //ritorno un valore a caso che non sia il nome di uno degli archi
-    return -4;
-}
-
-
-
-Vector2i Triangle::Raffina()
-{
-    //sono nel triangolo, voglio prendere il lato più lungo, faccio come ho fatto per le aree
-    //definisco una mappa che associa l'id del lato alla sua lunghezza
-    map<int, double> lati = {};
-    map<int, Vector2d> medi = {};
-    //v vettore temporaneo per ordinare le lunghezze
-    //per esempio qui sarebbe carino se riuscissimo ad evitare di creare un vettore così e passare direttamente a heapSort un vettore di aree (però per ora così funziona)
-    vector<double> v= {};
-
-
-
-    //potrei pensare, quando costruisco il triangolo di creare una tabella lati dove salvare le coordinate per evitare di doverle creare tutte le volte
-
-
-
-
-    //calcolo le lunghezze dei lati
-    for(unsigned int i=0; i< 3; i++)
-    {
-        Vector2d punti;
-        //cout<<i<<"\t"<<(i+1)%3<<endl;
-        double x1=coordinate(0,i);
-        double y1=coordinate(1,i);
-        double x2=coordinate(0,(i+1)%3);
-        double y2=coordinate(1,(i+1)%3);
-        double lunghezza = distanza(x1,y1,x2,y2);
-        //double xM; yM;
-        punti(0) = (x2+x1)/2;
-        punti(1) = (y2+y1)/2;
-        //inserisco id e area nella mappa, solo l'area nella lista
-        lati.insert({edges[i], lunghezza});
-        v.push_back(lunghezza);
-        medi.insert({edges[i], punti});
-        //cout<<edges[i]<<"\t"<<lunghezza<<"\t"<<vertices[i]<<"\t"<<vertices[(i+1)%3]<<endl;
-        //cout<<x1<<"\t"<<y1<<"\t"<<x2<<"\t"<<y2<<"\t"<<punti(0)<<"\t"<<punti(1)<<endl;
-    }
-    //cout<<endl;
-
-    v=SortLibrary::HeapSort<double>(v);
-    //cerco l'id del primo triangolo
-    unsigned int idLatoMaggiore;
-    for (const auto& coppia : lati) {
-            if (coppia.second == v[0]) {
-                idLatoMaggiore = coppia.first;
-                break;
+    {  for (unsigned int j=0;j<3;j++)
+        {   if (edges[i].id==triangolo2.edges[j].id)
+            {
+                //vicini.push_back(triangolo2);
+                //triangolo2.vicini.push_back(*this);
+                //cout<<edges[i].id<<endl;
+                if ((adiacenza.coeff(this->id, triangolo2.id) == 0)||(adiacenza.coeff(triangolo2.id, this->id)==0))
+                {
+                    adiacenza.insert(this->id, triangolo2.id) = edges[i].id;
+                    adiacenza.insert(triangolo2.id,this->id) = edges[i].id;
+                }
             }
         }
-    cout<<idLatoMaggiore<<endl;
+    }
 
+}
 
-
-
-    //abbiamo trovato le coordinate del punto medio, ora dobbiamo salvarle
-    //ci serve un (id, marker, coordinate)
-
-
-    //dobbiamo salvare il nuovo lato, quindi prendere il vertice non compreso nel lato
-    //accediamo tramite l'id alla mesh e cicliamo fra i vertici
-    unsigned int idVerticeOpposto;
+ShapeLibrary::Vertice Triangle::VerticeOpposto(ShapeLibrary::Arco& arco){
     for (unsigned int i=0;i<3;i++)
     {
-        bool flag = false;
-        for (unsigned int j=0;j<2;j++)
-        {
-            //cout<<vertices[i]<<"\t"<<mesh.Cell1DVertices[idLatoMaggiore][j]<<endl;
-            if(vertices[i] == mesh.Cell1DVertices[idLatoMaggiore][j])
-            {
-                //cout<<"qui"<<endl;
-                flag = true;
-                break;
-            }
-            //cout<<"qua"<<endl;
-
-        }
-        if (flag == false)
-        {
-            idVerticeOpposto = vertices[i];
-            break;
-        }
-
+        if (vertices[i].id != arco.inizio.id && vertices[i].id != arco.fine.id)
+            return vertices[i];
     }
-   cout<<idVerticeOpposto<<endl;
 
-   //definisco i nuovi id
-   unsigned int idArcoNuovo = mesh.NumberCell1D;
-   unsigned int idVerticeNuovo = mesh.NumberCell0D;
-   //aggiorniamo il numero di archi e di vertici presenti nella struct
+}
 
-   mesh.NumberCell1D +=1;
-   mesh.NumberCell0D +=1;
+tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco>  Triangle::Raffina(const unsigned int& newIdEdges, const unsigned int& newIdVert){
+    //prendo gli archi e li ordino seleziando il più lungo
+    vector<ShapeLibrary::Arco> arc ;
+    cout<<"\narchi e lunghezza: "<<endl;
+    for (unsigned int i = 0;i<3; i++)
+    {
+        edges[i].CalcolaLunghezza();
+        cout<<edges[i].id<<"\t"<<edges[i].lunghezza<<endl;
+        arc.push_back(edges[i]);
+    }
+    arc = SortLibrary::HeapSort(arc, &ShapeLibrary::Arco::lunghezza);
+    cout<<"\nil lato più lungo: "<<arc[0].id<<endl;
 
-
-
-   mesh.Cell0DId.push_back(idVerticeNuovo);
-
-   mesh.Cell0DCoordinates.push_back(medi[idLatoMaggiore]);
-
-   Vector2i puntinuovi;
-   puntinuovi(0) = idVerticeOpposto;
-   puntinuovi(1) = idVerticeNuovo;
-
-
-   mesh.Cell1DId.push_back(idArcoNuovo);
-   mesh.Cell1DVertices.push_back(puntinuovi);
-
-  cout<<idLatoMaggiore<<"\t"<<idVerticeNuovo<<endl;
-  Vector2i result ;
-  result(0) = idLatoMaggiore;
-  result(1) = idVerticeNuovo;
-  return result;
- }
-
+    //selezionato il lato più lungo mi calcolo il punto medio
+    ShapeLibrary::Vertice punto = arc[0].CalcolaPuntoMedio(newIdVert);
+    ShapeLibrary::Arco arco;
+    //cerco il vertice opposto
+    arco.id = newIdEdges;
+    arco.marker = 0;
+    arco.inizio = VerticeOpposto(arc[0]);
+    arco.fine = punto;
+    cout<<"punto aggiunto: "<<punto.id<<endl;
+    cout<<"Arco aggiunto: "<<arco.id<<"\t"<<arco.marker<<"\t"<<arco.inizio.id<<"\t"<<arco.fine.id<<endl;
+    tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco> aggiunti(arco, punto, arc[0]);
+    return aggiunti;
+}
 
 
 
 
+Mesh::Mesh(vector<ShapeLibrary::Triangle>& triangoli,vector<ShapeLibrary::Arco>& archi,vector<ShapeLibrary::Vertice>& vertici):triangoli(triangoli), archi(archi),vertici(vertici){}
 
-
-
-
-
-//gli passo una lista di oggetti della classe triangolo e ne deriva la matrice di adiacenza
-Mesh::Mesh(vector<ShapeLibrary::Triangle>& lista): lista(lista){
-///si può parallelizzare
+void Mesh::CalcolaMatriceAdiacenza()
+{
     //calcolo la matrice di adiacenza
-    unsigned int numTri = lista.size();
+    unsigned int numTri = triangoli.size();
 
-    Eigen::SparseMatrix<double> adj(numTri,numTri);
+    Eigen::SparseMatrix<unsigned int> adj(numTri,numTri);
 
     //cerco le adiacenze frai vari triangoli
     for (unsigned int i= 0; i< numTri-1; i++)
     {
         //seleziono un triangolo
         for (unsigned int j = i+1; j<numTri;j++)
-        {
-            //cerco tutti i triangoli che confinano
-            int link = lista[i].Vicini(lista[j]);
-            if (link >=0)
-            {
-                //cout<<link<<endl;
-                adj.insert(lista[i].id, lista[j].id) = link;
-                adj.insert(lista[j].id, lista[i].id) = link;
-            }
+        {     
+
+            triangoli[i].isVicino(triangoli[j], adj);
+
         }
     }
     adiacenza = adj;
 
 }
-/*    Vector2i aggiunta  = lista[idPartenza].Raffina();
-    //adesso ho il punto aggiunto, verifico se è ben posto
-    mesh.Verifica(aggiunta);*/
 
-void Mesh::Verifica(unsigned int& idPartenza, Vector2i& aggiunta )
+unsigned int Mesh::NuovoIdVertice()
 {
-    //cerco il triangolo vicino al triangolo di partenza avente l'id del lato maggiore
-    InnerIterator<SparseMatrix<double>> it(adiacenza, idPartenza);
-        unsigned int idTriAdiacente = 0;
-        while (it && idTriAdiacente == 0 && idTriAdiacente!=idPartenza) {
-            if (it.value() == aggiunta[0]) {
-                idTriAdiacente = it.row();
-            }
-            ++it;
-        }
-    cout<<idTriAdiacente<<"\t"<<idPartenza<<endl;
-    //ora siamo nel triangolo adiacente
-    Vector2i puntiNuovi = lista[idTriAdiacente].Raffina();
-    //proviamo a congiungere il nuovo punto del secondo triangolo con il primo
-    double x1 =lista[idTriAdiacente].mesh.Cell0DCoordinates[idTriAdiacente][0];
-    double y1 =lista[idTriAdiacente].mesh.Cell0DCoordinates[idTriAdiacente][1];
-    double x2 =lista[idPartenza].mesh.Cell0DCoordinates[idPartenza][0];
-    double y2 =lista[idPartenza].mesh.Cell0DCoordinates[idPartenza][1];
+    //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
+    vector<ShapeLibrary::Vertice> lista;
+    lista = vertici;
+    lista = SortLibrary::HeapSort(vertici, &ShapeLibrary::Vertice::id);
+    //cout<<lista[0].id<<endl;
+    return lista[0].id +1;
+}
 
+unsigned int Mesh::NuovoIdArco()
+{
+    //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
 
-    cout<<x1<<"\t"<<x2<<"\t"<<y1<<"\t"<<y2<<endl;
-    //ci dobbiamo salvare le coordinate
-    if (abs(x1-x2)==0 && abs(y1-y2)==0)
-    {   cout<<"qui"<<endl;
-        return;}
-    else
+    vector<ShapeLibrary::Arco> lista;
+    lista = archi;
+    lista = SortLibrary::HeapSort(archi, &ShapeLibrary::Arco::id);
+    //cout<<lista[0].id<<endl;
+    return lista[0].id +1;
+}
+
+unsigned int Mesh::NuovoIdTriangolo()
+{
+    //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
+
+    vector<ShapeLibrary::Triangle> lista;
+    lista = triangoli;
+    lista = SortLibrary::HeapSort(triangoli, &ShapeLibrary::Triangle::id);
+    //cout<<lista[0].id<<endl;
+    return lista[0].id +1;
+}
+
+ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Vertice& nodo2)
+{
+    //cerco in tutta la lista quale arco è associato a questi nodi
+    for(unsigned int i=0; i<archi.size();i++)
     {
-        cout<<"qua"<<endl;
-        //congiungiamo i due punti e richiamiamo verifica
-        //dovremmo salvare il nuovo e aggiungerla alla mesh(struct)
-
-        //chiamiamo di nuovo verifica
-        Verifica(idTriAdiacente, puntiNuovi);
-
+        if ((archi[i].inizio.id == nodo1.id && archi[i].fine.id == nodo2.id) || (archi[i].inizio.id == nodo2.id && archi[i].fine.id == nodo1.id))
+            return archi[i];
     }
 }
 
+void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& arco, ShapeLibrary::Vertice& nodo3)
+{
+    cout<<newIdTriangle<<endl;
+    ShapeLibrary::Triangle triangolo;
+    triangolo.id = newIdTriangle;
+    //nuovo noodo
+    triangolo.vertices[0] =arco.inizio;
+    //vertice opposto
+    triangolo.vertices[1] =arco.fine;
+    //l'altro
+    triangolo.vertices[2] =nodo3;
+
+
+    triangolo.edges[0] =arco;
+    //già esiste
+    triangolo.edges[1] = CercaArco(arco.fine, nodo3);
+    //devo crearlo
+    ShapeLibrary::Arco arco2;
+    arco2.id = NuovoIdArco();
+    arco2.inizio = nodo3;
+    arco2.fine = arco.inizio;
+    arco2.marker = 0;
+    archi.push_back(arco2);
+    triangolo.edges[2] = arco2;
+
+    triangoli.push_back(triangolo);
+    //inserisci nella matrice di adiacenza
+    adiacenza.conservativeResize(newIdTriangle + 1, newIdTriangle+1);
+
+    for (unsigned int i = 0; i<(triangoli.size())-1; i++)
+    {
+       triangolo.isVicino(triangoli[i], adiacenza);
+    }
+    //cout<<"superato"<<endl;
+}
+
+unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
+{
+    for (InnerIterator<SparseMatrix<unsigned int>> it(adiacenza, col); it; ++it) {
+            if (it.value() == valore) {
+                cout<<"\nTriangolo Adiancente ha id: "<<it.row()<<endl;
+                return it.row() ;
+
+            }
+
+        }
+    //se sono finito nell'else significa che non ci sono triangoli, quindi mi trovo al bordo, ritorno l'indice di colonna
+    return col;
+
+}
+
+void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLibrary::Arco& arcoVecchio){
+    //devo per prima cosa cancellare l'arco in comune
+    //per ora non cambio la matrice di adiacenza, ma forse converrebbe aggiornare le chiamate piuttosto che rifarla tutta
+    for (unsigned int i = 0; i<archi.size();i++)
+    {
+        if (archi[i].id == arcoVecchio.id)
+        {
+            archi.erase(archi.begin()+i);
+            cout<<"Cancellato l'arco: "<<arcoVecchio.id<<endl;
+            break;
+        }
+    }
+//cout<<"non c'è nessun arco da cancellare"<<endl;
+    //cout<<"non c'è nessun arco da cancellare"<<endl;
+    for (unsigned int i = 0; i<triangoli.size();i++)
+    {
+        if (triangoli[i].id == triangoloPartenza.id)
+        {
+            triangoli.erase(triangoli.begin()+i);
+            cout<<"Cancellato il triangolo: "<<triangoloPartenza.id<<endl;
+            break;
+        }
+    }
+    //TODO cancella nella matrice di adiacenza
+    //adiacenza.conservativeResize(newIdTriangle -1, newIdTriangle-1);
+    //adiacenza.middleRows(triangoloPartenza.id, adiacenza.rows() - triangoloPartenza.id) = adiacenza.bottomRows(adiacenza.rows() - triangoloPartenza.id);
+    //adiacenza.middleCols(triangoloPartenza.id, adiacenza.cols() - triangoloPartenza.id) = adiacenza.rightCols(adiacenza.cols() - triangoloPartenza.id);
+    //adiacenza.pruned(triangoloPartenza.id,triangoloPartenza.id);
+    /*for (InnerIterator<SparseMatrix<unsigned int>> it(adiacenza, triangoloPartenza.id); it; ++it) {
+        cout<<it.value()<<endl;
+            if (it.value() != 0) {
+                cout<<"\nSto eliminando: "<<it.value()<<endl;
+                adiacenza.coeffRef(triangoloPartenza.id, it.index()) = null;
+                adiacenza.coeffRef(it.index(),triangoloPartenza.id) = null;
+
+            }
+
+        }*/
+    //mi creo un matrice di appoggio,
+    Eigen::SparseMatrix<unsigned int> adj(adiacenza.rows(),adiacenza.cols());
+    //cout <<"\n"<< adiacenza.rows()<<"\t"<<adiacenza.cols()<<endl;
+    for(unsigned int i = 0; i<adiacenza.rows()-1;i++)
+    {   //cout<<"i: "<<i<<"j:"<<endl;
+        if (i!=triangoloPartenza.id)
+        {
+        for (unsigned int j = i+1; j<adiacenza.cols(); j++)
+        {
+            if (j!=triangoloPartenza.id){
+            //cout<<j<<endl;
+
+            adj.insert(i, j) = adiacenza.coeffRef(i,j);
+            adj.insert(j, i) = adiacenza.coeffRef(j,i);
+            }
+
+        }
+        }
+    }
+    adiacenza = adj;
+
+
+}
+void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoNuovo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio){
+
+    //voglio verificare se l'arco e il nodo che ho creato hanno rotto la mia mesh
+    //parto quindi dal triangolo che ho raffinato, se esiste, il triangolo adiacente al lato che ho modicato, faccio quindi accesso alla matrice di adiacenza
+
+    unsigned int idTri;
+    unsigned int col = triangolo.id;
+    unsigned int valore = arcoVecchio.id;
+
+    idTri = Trova(col, valore);
+    //cout<<"id del triangolo adiancente:"<<idTri<<endl;
+    if (idTri == col)
+    {
+        //se non ho vicini sono sul bordo e posso terminare il raffinamento
+        cout<<"sono sul bordo, raffinamento completato"<<endl;
+    }
+
+    else{
+
+        //adesso dovrei raffinare il triangolo adiacente
+        ShapeLibrary::Triangle TriangAdiace =id2object(idTri, triangoli);
+
+        //raffino e mi salvo il nuovo arco e il nuovo punto
+        unsigned int newIdEdges = NuovoIdArco();
+        unsigned int newIdVert = NuovoIdVertice();
+        tuple<ShapeLibrary::Arco, ShapeLibrary::Vertice,ShapeLibrary::Arco> aggiunti(TriangAdiace.Raffina(newIdEdges, newIdVert));
+
+        ShapeLibrary::Arco arcoNuovo2 = get<0>(aggiunti);
+        ShapeLibrary::Vertice puntoNuovo2 = get<1>(aggiunti);
+        ShapeLibrary::Arco arcoLungo= get<2>(aggiunti);
+
+        //aggiungo sicuramente l'arco
+        archi.insert(archi.begin(),arcoNuovo2);
+
+        //devo verificare se il punto nuovo medio calcolato coincide con quello che sto controllando oppure no
+        if (arcoLungo.id ==arcoVecchio.id)
+        {
+            //mi salvo solo il nuovo arco
+            cout<<"\nwe, ho già finito di raffinare"<<endl;
+
+            //adesso dovrei anche aggiungere i due triangoli che si sono formati
+            unsigned int newIdTriangle = NuovoIdTriangolo();
+            //TODO
+            InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.inizio );
+            newIdTriangle +=1;
+            InserisciTriangoli(newIdTriangle,arcoNuovo2, arcoLungo.fine );
+        }
+        else{
+            //se non coincidono, allora devo unire i punti medi
+
+            //devo congiungere il punto medio con il vecchio punto medio
+            ShapeLibrary::Arco arcoDiMezzo;
+            arcoDiMezzo.id = newIdEdges+1;
+            arcoDiMezzo.marker = 0;
+            arcoDiMezzo.inizio = nodoNuovo ;
+            arcoDiMezzo.fine = puntoNuovo2;
+
+            //aggiungo il nuovo arco nella lista
+            archi.insert(archi.begin(),arcoDiMezzo);
+
+            unsigned int newIdTriangle = NuovoIdTriangolo();
+            InserisciTriangoli(newIdTriangle, arcoDiMezzo, arcoVecchio.inizio);
+            newIdTriangle +=1;
+            InserisciTriangoli(newIdTriangle,arcoDiMezzo, arcoVecchio.fine );
+            newIdTriangle +=1;
+            if (arcoLungo.inizio.id ==arcoVecchio.inizio.id ||arcoLungo.inizio.id ==arcoVecchio.fine.id)
+                InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.fine);
+            else
+                InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.inizio);
+
+
+            //verifico che queste aggiunte non abbiano causato interferenze
+            Verifica(TriangAdiace,arcoNuovo2,puntoNuovo2, arcoLungo);
+            CancellaTriangolo(TriangAdiace, arcoVecchio);
+
+            }
+        //posso cancellare il triangolo di partenza
+        cout<<"Sto per cancellare: "<<triangolo.id<<"\t   e\t"<<arcoVecchio.id<<endl;
+        CancellaTriangolo(TriangAdiace, arcoLungo);
+    }
+
+
+
+}
+
+
+
+void Mesh::RaffinamentoStart(){
+    //calcolo le aree dei triangoli
+    //cout<<"\nid e aree:"<<endl;
+
+    for (unsigned int i=0; i<triangoli.size();i++)
+    {
+        //calcolo l'area di tutti i triangoli
+        triangoli[i].CalcolaArea();
+        //cout<<triangoli[i].id<<"\t"<<triangoli[i].area<<endl;
+    }
+    //cout<<endl;
+    //ordino i triangoli per area
+    triangoli = SortLibrary::HeapSort(triangoli, &ShapeLibrary::Triangle::area);
+    ShapeLibrary::Triangle triangoloPartenza = triangoli[0];
+    cout<<"triangolo con area più grande:\n"<<triangoloPartenza.id<<"\t"<<triangoloPartenza.area<<endl;
+
+
+    //definisco i nuovi id per il punto e l'arco nuovo che si formerrano dopo il raffinamento
+    unsigned int newIdEdges = NuovoIdArco();
+    unsigned int newIdVert = NuovoIdVertice();
+    //raffino il triangolo più grande e mi salvo il nuovo arco e il nuovo punto
+    tuple<ShapeLibrary::Arco, ShapeLibrary::Vertice,ShapeLibrary::Arco> aggiunti(triangoloPartenza.Raffina(newIdEdges, newIdVert));
+    ShapeLibrary::Arco arcoNuovo = get<0>(aggiunti);
+    ShapeLibrary::Vertice puntoNuovo = get<1>(aggiunti);
+    ShapeLibrary::Arco arcoAdiacente= get<2>(aggiunti);
+
+    cout<<"arco Nuovo: "<<arcoNuovo.id<<"\t"<<"punto Nuovo: "<<puntoNuovo.id<<endl;
+
+    //aggiungo il punto alla lista di punti e l'arco alla lista di archi
+
+    archi.insert(archi.begin(),arcoNuovo);
+    vertici.insert(vertici.begin(),puntoNuovo);
+
+    //aggiungo i due tringoli che si sono formati
+    unsigned int newIdTriangle = NuovoIdTriangolo();
+
+    //creo un metodo crea triangoli gli passo il nuovo id e una lista di punti
+    InserisciTriangoli(newIdTriangle, arcoNuovo,arcoAdiacente.inizio);
+    newIdTriangle +=1;
+    InserisciTriangoli(newIdTriangle, arcoNuovo,arcoAdiacente.fine);
+
+
+    //verifico se queste aggiunte hanno rovinato la mesh
+    Verifica(triangoloPartenza, arcoNuovo, puntoNuovo, arcoAdiacente);
+
+    //posso cancellare il triangolo di partenza
+    //TODO definisci un metodo per cancellare dalla lista il triangolo di partenza
+    CancellaTriangolo(triangoloPartenza, arcoAdiacente);
+
+
+
+}
+
+/*void Mesh::Esporta()
+{
+    /// Open File
+    ofstream file;
+    file.open("./cell0DNuove.txt");
+
+    if (file.fail())
+    {
+      cerr<< "file open failed"<< endl;
+    }
+
+    file<< ""<< endl;
+
+    file<< "# vector 1"<< endl;
+    for (unsigned int i = 0; i < n; i++)
+      file<< (i != 0 ? " " : "")<< v1[i];
+    file<< endl;
+
+
+
+  /// Close File
+  file.close();
+
+
+}*/
 
 }
 
