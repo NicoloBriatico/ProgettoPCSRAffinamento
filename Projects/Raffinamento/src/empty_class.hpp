@@ -108,7 +108,7 @@ T id2object(unsigned int& id, vector<T>& vertici)
       //void CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza);
       void Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoNuovo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio);
       void RaffinamentoStart();
-      //void Esporta();
+      void Esporta();
 
   };
 }

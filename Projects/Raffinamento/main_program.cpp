@@ -13,7 +13,7 @@
 
 
 /*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA
-        DOVREMMO TESTARE ANCHEE LA TOLLERANZA
+        DOVREMMO TESTARE ANCHE LA TOLLERANZA
 */
 
 
@@ -37,10 +37,10 @@ int main()
     //----------------------------------------------------
 
     //imposto una percentuale di triangoli da considerare
-    double theta = 0.5;
+    double theta = 0.9;
 
-    vector<ShapeLibrary::Arco> archi;
     vector<ShapeLibrary::Vertice> vertici;
+    vector<ShapeLibrary::Arco> archi;
     vector<ShapeLibrary::Triangle> triangoli;
 
     if(!ImportMesh(vertici,archi, triangoli))
@@ -48,22 +48,6 @@ int main()
     return 1;
     }
 
-    //------------------------------------------------------------
-
-    //calcolo le aree dei triangoli
-
-    /*cout<<"\nid e aree:"<<endl;
-    for (unsigned int i=0; i<triangoli.size();i++)
-    {
-        //calcolo l'area di tutti i triangoli
-        triangoli[i].CalcolaArea();
-        cout<<triangoli[i].id<<"\t"<<triangoli[i].area<<endl;
-    }
-    cout<<endl;
-    //ordino i triangoli per area
-    triangoli = SortLibrary::HeapSort(triangoli, &ShapeLibrary::Triangle::area);
-    cout<<"triangolo con area più grande:\n"<<triangoli[0].id<<"\t"<<triangoli[0].area<<endl;
-*/
     //------------------------------------------------------------
 
     //mi costruisco un oggetto in classe mesh
@@ -82,7 +66,9 @@ int main()
         //dovrei aggiornare la matrice di adiacenza
     }
 
-    //mesh.Esporta();
+    mesh.Esporta();
+    //file vertici come in input;
+    //file archi che associ subito id arco, vertice inizio (senza id) con coordinata x e y, vertice fine (senza id) con coordinata x e y;
 
   return 0;
 

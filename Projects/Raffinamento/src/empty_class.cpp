@@ -1,6 +1,8 @@
 #include "empty_class.hpp"
 #include <math.h>
 #include "sortingArea.hpp"
+#include <fstream>
+#include <sstream>
 
 /*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA     */
 //i test vanno costruiti in un progetto a parte che è chiamato raffinamento_test
@@ -294,6 +296,7 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
 
 
 }
+
 void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoNuovo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio){
 
     //voglio verificare se l'arco e il nodo che ho creato hanno rotto la mia mesh
@@ -392,6 +395,7 @@ void Mesh::RaffinamentoStart(){
         //cout<<triangoli[i].id<<"\t"<<triangoli[i].area<<endl;
     }
     //cout<<endl;
+
     //ordino i triangoli per area
     triangoli = SortLibrary::HeapSort(triangoli, &ShapeLibrary::Triangle::area);
     ShapeLibrary::Triangle triangoloPartenza = triangoli[0];
@@ -434,31 +438,43 @@ void Mesh::RaffinamentoStart(){
 
 }
 
-/*void Mesh::Esporta()
+void Mesh::Esporta()
 {
     /// Open File
     ofstream file;
-    file.open("./cell0DNuove.txt");
+    file.open("./cell0DNuovo.csv");
 
     if (file.fail())
     {
       cerr<< "file open failed"<< endl;
     }
 
-    file<< ""<< endl;
+    for (unsigned int i = 0; i<vertici.size();i++) {
+        file<<vertici[i].id<<" "<<vertici[i].marker<<" "<<vertici[i].x<<" "<<vertici[i].y<<endl;
+       }
 
-    file<< "# vector 1"<< endl;
-    for (unsigned int i = 0; i < n; i++)
-      file<< (i != 0 ? " " : "")<< v1[i];
-    file<< endl;
+    /// Close File
+    file.close();
+
+    /// Open File
+    ofstream file1;
+    file1.open("./cell1DNuovo.csv");
+
+    if (file1.fail())
+    {
+      cerr<< "file open failed"<< endl;
+    }
+
+    for (unsigned int i = 0; i<archi.size();i++) {
+        file1<<archi[i].id<<" "<<archi[i].marker<<" "<<archi[i].inizio.x<<" "<<archi[i].inizio.y<<" "<<archi[i].fine.x<<" "<<archi[i].fine.y<<endl;
+       }
+
+    /// Close File
+    file1.close();
 
 
 
-  /// Close File
-  file.close();
-
-
-}*/
+}
 
 }
 
