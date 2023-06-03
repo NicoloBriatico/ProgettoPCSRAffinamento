@@ -37,7 +37,7 @@ int main()
     //----------------------------------------------------
 
     //imposto una percentuale di triangoli da considerare
-    double theta = 0.9;
+    double theta = 0.5;
 
     vector<ShapeLibrary::Vertice> vertici;
     vector<ShapeLibrary::Arco> archi;
@@ -62,6 +62,8 @@ int main()
     {
 
         mesh.RaffinamentoStart();
+        //mesh.RaffinamentoStart();
+        //mesh.RaffinamentoStart();
         //mesh.RaffinamentoStart();
         //dovrei aggiornare la matrice di adiacenza
     }

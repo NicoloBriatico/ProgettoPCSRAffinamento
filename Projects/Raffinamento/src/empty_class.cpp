@@ -65,14 +65,14 @@ void Triangle::isVicino(ShapeLibrary::Triangle& triangolo2,Eigen::SparseMatrix<u
     {  for (unsigned int j=0;j<3;j++)
         {   if (edges[i].id==triangolo2.edges[j].id)
             {
-                //vicini.push_back(triangolo2);
-                //triangolo2.vicini.push_back(*this);
-                //cout<<edges[i].id<<endl;
-                if ((adiacenza.coeff(this->id, triangolo2.id) == 0)||(adiacenza.coeff(triangolo2.id, this->id)==0))
+                //cout<<id<<"\t"<<triangolo2.id<<endl;
+                if ((adiacenza.coeff(id, triangolo2.id) == 0)||(adiacenza.coeff(triangolo2.id, id)== 0))
                 {
-                    adiacenza.insert(this->id, triangolo2.id) = edges[i].id;
-                    adiacenza.insert(triangolo2.id,this->id) = edges[i].id;
+                    cout<<id<<"\t"<<triangolo2.id<<"\t"<<edges[i].id<<endl;
+                    adiacenza.insert(id, triangolo2.id) = edges[i].id+1;
+                    adiacenza.insert(triangolo2.id,id) = edges[i].id+1;
                 }
+                return;
             }
         }
     }
@@ -85,6 +85,7 @@ ShapeLibrary::Vertice Triangle::VerticeOpposto(ShapeLibrary::Arco& arco){
         if (vertices[i].id != arco.inizio.id && vertices[i].id != arco.fine.id)
             return vertices[i];
     }
+    return arco.inizio;
 
 }
 
@@ -107,7 +108,10 @@ tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco>  Triangle::R
     //cerco il vertice opposto
     arco.id = newIdEdges;
     arco.marker = 0;
-    arco.inizio = VerticeOpposto(arc[0]);
+    if(VerticeOpposto(arc[0]).id != arc[0].inizio.id)
+        arco.inizio = VerticeOpposto(arc[0]);
+    else
+        cerr<<"errore di archi"<<endl;
     arco.fine = punto;
     cout<<"punto aggiunto: "<<punto.id<<endl;
     cout<<"Arco aggiunto: "<<arco.id<<"\t"<<arco.marker<<"\t"<<arco.inizio.id<<"\t"<<arco.fine.id<<endl;
@@ -177,16 +181,29 @@ unsigned int Mesh::NuovoIdTriangolo()
 ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Vertice& nodo2)
 {
     //cerco in tutta la lista quale arco è associato a questi nodi
+    //cout<<nodo1.id<<"\t"<<nodo2.id<<endl;
     for(unsigned int i=0; i<archi.size();i++)
     {
-        if ((archi[i].inizio.id == nodo1.id && archi[i].fine.id == nodo2.id) || (archi[i].inizio.id == nodo2.id && archi[i].fine.id == nodo1.id))
-            return archi[i];
+        if ((archi[i].inizio.id == nodo1.id && archi[i].fine.id == nodo2.id)||(archi[i].inizio.id == nodo2.id && archi[i].fine.id == nodo1.id))
+        {return archi[i];}
     }
+    //cout<<"ehi, come mai sono finito qui"<<endl;
+    ShapeLibrary::Arco arco2;
+    arco2.id = NuovoIdArco();
+    arco2.marker = 0;
+    arco2.inizio = nodo1;
+    arco2.fine = nodo2;
+
+
+    archi.insert(archi.begin(),arco2);
+
+
+    return arco2;
 }
 
 void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& arco, ShapeLibrary::Vertice& nodo3)
 {
-    cout<<newIdTriangle<<endl;
+    //cout<<newIdTriangle<<endl;
     ShapeLibrary::Triangle triangolo;
     triangolo.id = newIdTriangle;
     //nuovo noodo
@@ -200,35 +217,39 @@ void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& a
     triangolo.edges[0] =arco;
     //già esiste
     triangolo.edges[1] = CercaArco(arco.fine, nodo3);
-    //devo crearlo
-    ShapeLibrary::Arco arco2;
-    arco2.id = NuovoIdArco();
-    arco2.inizio = nodo3;
-    arco2.fine = arco.inizio;
-    arco2.marker = 0;
-    archi.push_back(arco2);
-    triangolo.edges[2] = arco2;
+    triangolo.edges[2] = CercaArco(nodo3, arco.inizio);
 
-    triangoli.push_back(triangolo);
+    triangoli.insert(triangoli.begin(),triangolo);
     //inserisci nella matrice di adiacenza
-    adiacenza.conservativeResize(newIdTriangle + 1, newIdTriangle+1);
+    //cout<< "senza\n";
+    //cout<<adiacenza<<endl;
 
-    for (unsigned int i = 0; i<(triangoli.size())-1; i++)
+    //cout<<"con ConservativeResize:\n";
+
+    adiacenza.conservativeResize(newIdTriangle + 1, newIdTriangle+1);
+    //cout<<adiacenza<<endl;
+    for (unsigned int i = 1; i<triangoli.size(); i++)
     {
-       triangolo.isVicino(triangoli[i], adiacenza);
+        //if(triangoli[i].id != triangolo.id)
+        //{
+        triangolo.isVicino(triangoli[i], adiacenza);
+        //}
     }
+
     //cout<<"superato"<<endl;
 }
 
 unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
 {
+    cout<<"sono in trova"<<endl;
+    //cout<<adiacenza<<endl;
     for (InnerIterator<SparseMatrix<unsigned int>> it(adiacenza, col); it; ++it) {
-            if (it.value() == valore) {
+            cout<<"perchè non funziona?"<<endl;
+            cout<<it.value()<<"\t";
+            if ((it.value()-1) == valore) {
                 cout<<"\nTriangolo Adiancente ha id: "<<it.row()<<endl;
                 return it.row() ;
-
             }
-
         }
     //se sono finito nell'else significa che non ci sono triangoli, quindi mi trovo al bordo, ritorno l'indice di colonna
     return col;
@@ -258,21 +279,6 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
             break;
         }
     }
-    //TODO cancella nella matrice di adiacenza
-    //adiacenza.conservativeResize(newIdTriangle -1, newIdTriangle-1);
-    //adiacenza.middleRows(triangoloPartenza.id, adiacenza.rows() - triangoloPartenza.id) = adiacenza.bottomRows(adiacenza.rows() - triangoloPartenza.id);
-    //adiacenza.middleCols(triangoloPartenza.id, adiacenza.cols() - triangoloPartenza.id) = adiacenza.rightCols(adiacenza.cols() - triangoloPartenza.id);
-    //adiacenza.pruned(triangoloPartenza.id,triangoloPartenza.id);
-    /*for (InnerIterator<SparseMatrix<unsigned int>> it(adiacenza, triangoloPartenza.id); it; ++it) {
-        cout<<it.value()<<endl;
-            if (it.value() != 0) {
-                cout<<"\nSto eliminando: "<<it.value()<<endl;
-                adiacenza.coeffRef(triangoloPartenza.id, it.index()) = null;
-                adiacenza.coeffRef(it.index(),triangoloPartenza.id) = null;
-
-            }
-
-        }*/
     //mi creo un matrice di appoggio,
     Eigen::SparseMatrix<unsigned int> adj(adiacenza.rows(),adiacenza.cols());
     //cout <<"\n"<< adiacenza.rows()<<"\t"<<adiacenza.cols()<<endl;
@@ -283,15 +289,17 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
         for (unsigned int j = i+1; j<adiacenza.cols(); j++)
         {
             if (j!=triangoloPartenza.id){
-            //cout<<j<<endl;
+                if(adiacenza.coeffRef(i,j)!=0){
+                    //cout<<j<<endl;
 
-            adj.insert(i, j) = adiacenza.coeffRef(i,j);
-            adj.insert(j, i) = adiacenza.coeffRef(j,i);
-            }
+                    adj.insert(i, j) = adiacenza.coeffRef(i,j);
+                    adj.insert(j, i) = adiacenza.coeffRef(j,i);
+                }}
 
         }
         }
     }
+    //triangoli.erase(triangoli.begin()+i);
     adiacenza = adj;
 
 
@@ -305,9 +313,10 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
     unsigned int idTri;
     unsigned int col = triangolo.id;
     unsigned int valore = arcoVecchio.id;
+    cout<<valore<<"\t"<<col<<endl;
 
     idTri = Trova(col, valore);
-    //cout<<"id del triangolo adiancente:"<<idTri<<endl;
+    cout<<"id del triangolo adiancente:"<<idTri<<"\t"<<col<<endl;
     if (idTri == col)
     {
         //se non ho vicini sono sul bordo e posso terminare il raffinamento
@@ -329,7 +338,9 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
         ShapeLibrary::Arco arcoLungo= get<2>(aggiunti);
 
         //aggiungo sicuramente l'arco
+
         archi.insert(archi.begin(),arcoNuovo2);
+
 
         //devo verificare se il punto nuovo medio calcolato coincide con quello che sto controllando oppure no
         if (arcoLungo.id ==arcoVecchio.id)
@@ -343,10 +354,12 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
             InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.inizio );
             newIdTriangle +=1;
             InserisciTriangoli(newIdTriangle,arcoNuovo2, arcoLungo.fine );
+            //archi.insert(archi.begin(),arcoLungo);
+
         }
         else{
             //se non coincidono, allora devo unire i punti medi
-
+            vertici.insert(vertici.begin(), puntoNuovo2);
             //devo congiungere il punto medio con il vecchio punto medio
             ShapeLibrary::Arco arcoDiMezzo;
             arcoDiMezzo.id = newIdEdges+1;
@@ -448,6 +461,7 @@ void Mesh::Esporta()
     {
       cerr<< "file open failed"<< endl;
     }
+
 
     for (unsigned int i = 0; i<vertici.size();i++) {
         file<<vertici[i].id<<" "<<vertici[i].marker<<" "<<vertici[i].x<<" "<<vertici[i].y<<endl;
