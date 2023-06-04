@@ -4,13 +4,94 @@
 #include <gtest/gtest.h>
 
 #include "empty_class.hpp"
+#include "sortingArea.hpp"
 #include "Eigen/Eigen"
 
 using namespace testing;
 using namespace Eigen;
 using namespace ShapeLibrary;
-/*
+using namespace SortLibrary;
 
+TEST(TestShape,TestCalcolaLunghezza)
+{
+    Vertice vertice1 = Vertice(41,0,0.703125,0.421875);
+    Vertice vertice2 = Vertice(43,0,0.705211,0.330114);
+    Arco arco = Arco(0,0,vertice1,vertice2);
+    arco.CalcolaLunghezza();
+    EXPECT_FLOAT_EQ(arco.lunghezza,0.0917847);
+    }
+
+TEST(TeshShape,TestCalcolaPuntoMedio)
+{
+    Vertice vertice1 = Vertice(41,0,0.703125,0.421875);
+    Vertice vertice2 = Vertice(43,0,0.705211,0.330114);
+    Arco arco = Arco(0,0,vertice1,vertice2);
+    Vertice PuntoMedio = arco.CalcolaPuntoMedio(199);
+    EXPECT_EQ(PuntoMedio.id,199);
+    EXPECT_EQ(PuntoMedio.marker,0);
+    EXPECT_FLOAT_EQ(PuntoMedio.x,0.704168);
+    EXPECT_FLOAT_EQ(PuntoMedio.y,0.3759945);
+}
+
+TEST(TestShape,TestCalcolaArea)
+{
+    array<ShapeLibrary::Vertice,3> vertices;
+    array<ShapeLibrary::Arco,3> edges;
+    Vertice vertice1 = Vertice(41,0,0.703125,0.421875);
+    Vertice vertice2 = Vertice(43,0,0.705211,0.330114);
+    Vertice vertice3 = Vertice(15,0,0.875000,0.375000);
+    vertices[0]=vertice1;
+    vertices[1]=vertice2;
+    vertices[2]=vertice3;
+    Arco arco1 = Arco(0,0,vertice1,vertice2);
+    Arco arco2 = Arco(1,0,vertice2,vertice3);
+    Arco arco3 = Arco(2,0,vertice3,vertice1);
+    edges[0]=arco1;
+    edges[1]=arco2;
+    edges[2]=arco3;
+    Triangle triangle = Triangle(0,vertices,edges);
+    triangle.CalcolaArea();
+    EXPECT_DOUBLE_EQ(triangle.area,0.036789);
+}
+
+TEST(TestShape, TestVerticeOpposto)
+{
+    Vertice vertice1 = Vertice(41,0,0.703125,0.421875);
+    Vertice vertice2 = Vertice(43,0,0.705211,0.330114);
+    Vertice vertice3 = Vertice(15,0,0.875000,0.375000);
+    array<ShapeLibrary::Vertice,3> vertices;
+    vertices[0]=vertice1;
+    vertices[1]=vertice2;
+    vertices[2]=vertice3;
+    Arco arco1 = Arco(0,0,vertice1,vertice2);
+    Arco arco2 = Arco(1,0,vertice2,vertice3);
+    Arco arco3 = Arco(2,0,vertice3,vertice1);
+    array<ShapeLibrary::Arco,3> edges;
+    edges[0]=arco1;
+    edges[1]=arco2;
+    edges[2]=arco3;
+    Triangle triangle = Triangle(0,vertices,edges);
+    Vertice verticeopposto = triangle.Triangle::VerticeOpposto(arco1);
+    EXPECT_EQ(verticeopposto.id,15);
+    EXPECT_EQ(verticeopposto.marker,0);
+    EXPECT_EQ(verticeopposto.x,0.875000);
+    EXPECT_EQ(verticeopposto.y,0.375000);
+}
+
+TEST(TestSort, TestMigliorePadreFigli)
+{
+    Vertice vertice1 = Vertice(41,0,0.703125,0.421875);
+    Vertice vertice2 = Vertice(43,0,0.705211,0.330114);
+    Vertice vertice3 = Vertice(15,0,0.875000,0.375000);
+    vector<Vertice> v = {vertice1,vertice2,vertice3};
+    unsigned int j = SortLibrary::MigliorePadreFigli(0,v,3,&Vertice::id);
+
+
+    EXPECT_EQ(j,2);
+}
+
+
+/*
 //testo triangolo
 TEST(TestShape, TestTriangleAsPolygon)
 {
@@ -180,7 +261,5 @@ TEST(TestShape, TestSquare)
   EXPECT_EQ(square.Show(), "Square: 0.250000");
 }
 */
-
-
 
 #endif // __TEST_EMPTY_H
