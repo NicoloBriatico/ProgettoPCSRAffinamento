@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Eigen/Eigen"
 #include "map"
+#include <chrono>
 
 //file contenente il codice per il sorting
 #include "sortingArea.hpp"
@@ -10,12 +11,6 @@
 #include "importa.hpp"
 //file contente le classi
 #include "empty_class.hpp"
-
-
-/*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA
-        DOVREMMO TESTARE ANCHE LA TOLLERANZA
-*/
-
 
 using namespace std;
 // ***************************************************************************
@@ -28,51 +23,80 @@ int main()
         * -TROVARE IL TRIANGOLO PIÙ GRANDE
         * -CREARE LA MESH DI PARTENZA
         * -RAFFINARE IL TRIANGOLO
-        * -VERIFICARE CHE LA MESH SIA BEN POSTA     <-NOI SIAMO QUI ORA
-        * -ESPORTARE IL FILE
-    */
+        * -VERIFICARE CHE LA MESH SIA BEN POSTA
+        * -ESPORTARE IL FILE                        <-NOI SIAMO QUI ORA
+        */
 
-    /*      VA SETTATA LA TOLLERANZA INIZIALE       */
+    /*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA   <-NOI SIAMO QUI ORA
+
+*/
 
     //----------------------------------------------------
 
     //imposto una percentuale di triangoli da considerare
-    double theta = 0.5;
+    double theta = 0.6;
 
+    //inizializzo i vettori che conterranno tutte gli oggetti di classe Vertice, Arco e Triangle
     vector<ShapeLibrary::Vertice> vertici;
     vector<ShapeLibrary::Arco> archi;
     vector<ShapeLibrary::Triangle> triangoli;
 
+    //faccio partire il cronometro
+    auto startImport = chrono::high_resolution_clock::now();
+
+    //importo i dati dal DataSet
     if(!ImportMesh(vertici,archi, triangoli))
     {
-    return 1;
+        return 1;
     }
+
+    //fermo il cronometro
+    auto endImport = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsedImport = endImport - startImport;
+
 
     //------------------------------------------------------------
 
-    //mi costruisco un oggetto in classe mesh
+    //Definisco un oggetto di classe Mesh
     ShapeLibrary::Mesh mesh = Mesh(triangoli, archi, vertici);
+
+    // parte il cronometro
+    auto startAdiacenza= chrono::high_resolution_clock::now();
+
     mesh.CalcolaMatriceAdiacenza();
+
+    //si ferma il cronometro
+    auto endAdiacenza = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsedAdiacenza= endAdiacenza - startAdiacenza;
     //cout<<mesh.adiacenza<<endl;
 
     //-----------------------------------------------------------
 
+    //mi salvo il numero iniziale di triangoli
     unsigned int numTriPartenza = triangoli.size();
+
+    //raffino fino al raggiungimento della percentuale di raffinamento richiesta
+    auto startRaffinamento= chrono::high_resolution_clock::now();
+
     while(numTriPartenza>mesh.triangoli.size()*theta)
-    {
-
         mesh.RaffinamentoStart();
-        //mesh.RaffinamentoStart();
-        //mesh.RaffinamentoStart();
-        //mesh.RaffinamentoStart();
-        //dovrei aggiornare la matrice di adiacenza
-    }
 
+    auto endRaffinamento = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsedRaffinamento = endRaffinamento - startRaffinamento;
+
+    auto startExport= chrono::high_resolution_clock::now();
+    //esporto i nuovi dati
     mesh.Esporta();
-    //file vertici come in input;
-    //file archi che associ subito id arco, vertice inizio (senza id) con coordinata x e y, vertice fine (senza id) con coordinata x e y;
+    auto endExport = chrono::high_resolution_clock::now();
+    chrono::duration<double> elapsedExport = endExport - startExport;
 
-  return 0;
+
+    cout<<"\nTempo di import: "<<elapsedImport.count()<<" sec"<<endl;
+    cout<<"Tempo di creazione matrice di Adiacenza: "<<elapsedAdiacenza.count()<<" sec"<<endl;
+    cout<<"Tempo di Raffinamento: "<<elapsedRaffinamento.count()<<" sec"<<endl;
+    cout<<"Tempo di Raffinamento: "<<elapsedExport.count()<<" sec"<<endl;
+
+    return 0;
 
 }
 
