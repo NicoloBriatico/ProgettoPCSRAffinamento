@@ -173,12 +173,13 @@ ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Ve
     //se non esiste, me lo creo
     ShapeLibrary::Arco arco2;
     arco2.id = NuovoIdArco();
-   //se uno dei due è interno
+
+    //se hanno lo stesso id
     if(nodo1.marker == nodo2.marker)
             arco2.marker = nodo1.marker;
+    //se uno dei due è interno
     else if((nodo1.marker = 0)||(nodo2.marker =0))
             arco2.marker = 0;
-     //se hanno lo stesso id
     //se uno dei due è un nodo di angolo
     else if ((nodo1.marker = 1)||(nodo1.marker = 2)||(nodo1.marker = 3)||(nodo1.marker = 4))
     {
