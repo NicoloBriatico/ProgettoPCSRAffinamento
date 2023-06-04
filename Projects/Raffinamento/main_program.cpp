@@ -34,7 +34,7 @@ int main()
     //----------------------------------------------------
 
     //imposto una percentuale di triangoli da considerare
-    double theta = 0.6;
+    double theta = 0.3;
 
     //inizializzo i vettori che conterranno tutte gli oggetti di classe Vertice, Arco e Triangle
     vector<ShapeLibrary::Vertice> vertici;

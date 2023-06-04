@@ -58,7 +58,7 @@ void Triangle::isVicino(ShapeLibrary::Triangle& triangolo2,Eigen::SparseMatrix<u
                 //cout<<id<<"\t"<<triangolo2.id<<endl;
                 if ((adiacenza.coeff(id, triangolo2.id) == 0)||(adiacenza.coeff(triangolo2.id, id)== 0))
                 {
-                    cout<<id<<"\t"<<triangolo2.id<<"\t"<<edges[i].id<<endl;
+                    //cout<<id<<"\t"<<triangolo2.id<<"\t"<<edges[i].id<<endl;
                     adiacenza.insert(id, triangolo2.id) = edges[i].id+1;
                     adiacenza.insert(triangolo2.id,id) = edges[i].id+1;
                 }
@@ -173,7 +173,10 @@ ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Ve
     //se non esiste, me lo creo
     ShapeLibrary::Arco arco2;
     arco2.id = NuovoIdArco();
-    arco2.marker = 0;
+    if(nodo1.marker == nodo2.marker)
+        arco2.marker = nodo1.marker;
+    else
+        arco2.marker = 0;
     arco2.inizio = nodo1;
     arco2.fine = nodo2;
 
@@ -302,14 +305,15 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
 
         //aggiungo l'arco
 
-        archi.insert(archi.begin(),arcoNuovo2);
+
 
 
         //devo verificare se il punto nuovo medio calcolato coincide con quello che sto controllando oppure no
         if (arcoLungo.id ==arcoVecchio.id)
         {
             cout<<"\nwe, ho già finito di raffinare"<<endl;
-
+            arcoNuovo2.fine = nodoNuovo;
+            archi.insert(archi.begin(),arcoNuovo2);
             //aggiungo i due triangoli che si sono formati
             unsigned int newIdTriangle = NuovoIdTriangolo();
 
@@ -321,7 +325,7 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
 
             //se non coincidono, allora salvo il nuovo punto
             vertici.insert(vertici.begin(), puntoNuovo2);
-
+            archi.insert(archi.begin(),arcoNuovo2);
             //congiungo i due punti
             ShapeLibrary::Arco arcoDiMezzo;
             arcoDiMezzo.id = newIdEdges+1;
@@ -339,16 +343,17 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
             InserisciTriangoli(newIdTriangle,arcoDiMezzo, arcoVecchio.fine );
             newIdTriangle +=1;
 
+            //TODO CONTROLLA QUESTE CONDIZIONI
             if (arcoLungo.inizio.id ==arcoVecchio.inizio.id ||arcoLungo.inizio.id ==arcoVecchio.fine.id)
                 InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.fine);
-            else
+            else if (arcoLungo.fine.id ==arcoVecchio.inizio.id ||arcoLungo.fine.id ==arcoVecchio.fine.id)
                 InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.inizio);
 
             //verifico che queste aggiunte non abbiano causato interferenze
-            Verifica(TriangAdiace,arcoNuovo2,puntoNuovo2, arcoLungo);
+            Verifica(TriangAdiace, arcoNuovo2, puntoNuovo2, arcoLungo);
 
             //TODO attenzione qui prima c'era arcoVecchio
-            CancellaTriangolo(TriangAdiace, arcoLungo);
+            //CancellaTriangolo(TriangAdiace, arcoLungo);
 
         }
         //cancello il triangolo di partenza
