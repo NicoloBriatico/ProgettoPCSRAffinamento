@@ -107,7 +107,7 @@ void CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLibrary::
 ShapeLibrary::Arco CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Vertice& nodo2);
 void InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& arco, ShapeLibrary::Vertice& nodo3);
 //void CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza);
-void Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoNuovo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio);
+void Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio);
 void RaffinamentoStart();
 void Esporta();
 

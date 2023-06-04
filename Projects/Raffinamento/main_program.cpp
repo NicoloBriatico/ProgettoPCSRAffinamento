@@ -30,6 +30,9 @@ int main()
     /*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA   <-NOI SIAMO QUI ORA
 
 */
+    /*TODO,quando cerco l'arco potrei evitare di perdere tempo scorrendo tutta la lista, se verifico subito ch l'id dell
+     * 'arco è un id di bordo posso fermarmi subito senza perdere tempo
+     */
 
     //----------------------------------------------------
 
@@ -58,6 +61,8 @@ int main()
     //------------------------------------------------------------
 
     //Definisco un oggetto di classe Mesh
+    archi = SortLibrary::HeapSort(archi, &ShapeLibrary::Arco::id);
+    vertici = SortLibrary::HeapSort(vertici, &ShapeLibrary::Vertice::id);
     ShapeLibrary::Mesh mesh = Mesh(triangoli, archi, vertici);
 
     // parte il cronometro

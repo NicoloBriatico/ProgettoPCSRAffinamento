@@ -134,27 +134,27 @@ void Mesh::CalcolaMatriceAdiacenza()
     adiacenza = adj;
 }
 
-unsigned int Mesh::NuovoIdVertice()
+inline unsigned int Mesh::NuovoIdVertice()
 {
     //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
-    vector<ShapeLibrary::Vertice> lista;
-    lista = vertici;
-    lista = SortLibrary::HeapSort(vertici, &ShapeLibrary::Vertice::id);
-    return lista[0].id +1;
+    //vector<ShapeLibrary::Vertice> lista;
+    //lista = vertici;
+    //lista = SortLibrary::HeapSort(vertici, &ShapeLibrary::Vertice::id);
+    return vertici[0].id +1;
 }
 
-unsigned int Mesh::NuovoIdArco()
+inline unsigned int Mesh::NuovoIdArco()
 {
     //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
-    vector<ShapeLibrary::Arco> lista;
-    lista = archi;
-    lista = SortLibrary::HeapSort(archi, &ShapeLibrary::Arco::id);
-    return lista[0].id +1;
+    //vector<ShapeLibrary::Arco> lista;
+    //lista = archi;
+    //lista = SortLibrary::HeapSort(archi, &ShapeLibrary::Arco::id);
+    return archi[0].id +1;
 }
 
-unsigned int Mesh::NuovoIdTriangolo()
+inline unsigned int Mesh::NuovoIdTriangolo()
 {
-    //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
+    //la lista di triangoli viene ordinata per aree, ma a me serve averla ordina per id
     vector<ShapeLibrary::Triangle> lista;
     lista = triangoli;
     lista = SortLibrary::HeapSort(triangoli, &ShapeLibrary::Triangle::id);
@@ -173,10 +173,28 @@ ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Ve
     //se non esiste, me lo creo
     ShapeLibrary::Arco arco2;
     arco2.id = NuovoIdArco();
+   //se uno dei due è interno
     if(nodo1.marker == nodo2.marker)
-        arco2.marker = nodo1.marker;
-    else
-        arco2.marker = 0;
+            arco2.marker = nodo1.marker;
+    else if((nodo1.marker = 0)||(nodo2.marker =0))
+            arco2.marker = 0;
+     //se hanno lo stesso id
+    //se uno dei due è un nodo di angolo
+    else if ((nodo1.marker = 1)||(nodo1.marker = 2)||(nodo1.marker = 3)||(nodo1.marker = 4))
+    {
+        if ((nodo2.marker = 1)||(nodo2.marker = 2)||(nodo2.marker = 3)||(nodo2.marker = 4))
+            arco2.marker = 0;
+        else
+            arco2.marker = nodo2.marker;
+    }
+    else if ((nodo2.marker = 1)||(nodo2.marker = 2)||(nodo2.marker = 3)||(nodo2.marker = 4))
+    {
+        if ((nodo1.marker = 1)||(nodo1.marker = 2)||(nodo1.marker = 3)||(nodo1.marker = 4))
+            arco2.marker = 0;
+        else
+            arco2.marker = nodo1.marker;
+        }
+
     arco2.inizio = nodo1;
     arco2.fine = nodo2;
 
@@ -270,9 +288,7 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
     adiacenza = adj;
 }
 
-void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoNuovo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio){
-
-    //TODO mi serve arcoNuovo, altrimenti lo cancello
+void Mesh::Verifica(ShapeLibrary::Triangle& triangolo,  ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio){
 
     //cerco un triangolo adiacente al lato che ho raffinato
     unsigned int idTri;
@@ -280,9 +296,9 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
     unsigned int valore = arcoVecchio.id;
     //cout<<valore<<"\t"<<col<<endl;
 
-    idTri = Trova(col, valore);
+    //idTri = Trova(col, valore);
 
-    if (idTri == col)
+    if (arcoVecchio.marker!=0)//(idTri == col)
     {
         //TODO sicuro non serva fare niente altro?
         //se non ho vicini sono sul bordo e posso terminare il raffinamento
@@ -290,6 +306,7 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
     }
 
     else{
+        idTri = Trova(col, valore);
         cout<<"il triangolo "<<idTri<<" è adiacente a "<<col<<endl;
 
         //raffino il triangolo adiacente
@@ -302,11 +319,6 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
         ShapeLibrary::Arco arcoNuovo2 = get<0>(aggiunti);
         ShapeLibrary::Vertice puntoNuovo2 = get<1>(aggiunti);
         ShapeLibrary::Arco arcoLungo= get<2>(aggiunti);
-
-        //aggiungo l'arco
-
-
-
 
         //devo verificare se il punto nuovo medio calcolato coincide con quello che sto controllando oppure no
         if (arcoLungo.id ==arcoVecchio.id)
@@ -343,23 +355,20 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Arco& arcoN
             InserisciTriangoli(newIdTriangle,arcoDiMezzo, arcoVecchio.fine );
             newIdTriangle +=1;
 
-            //TODO CONTROLLA QUESTE CONDIZIONI
             if (arcoLungo.inizio.id ==arcoVecchio.inizio.id ||arcoLungo.inizio.id ==arcoVecchio.fine.id)
                 InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.fine);
             else if (arcoLungo.fine.id ==arcoVecchio.inizio.id ||arcoLungo.fine.id ==arcoVecchio.fine.id)
                 InserisciTriangoli(newIdTriangle, arcoNuovo2, arcoLungo.inizio);
 
             //verifico che queste aggiunte non abbiano causato interferenze
-            Verifica(TriangAdiace, arcoNuovo2, puntoNuovo2, arcoLungo);
+            Verifica(TriangAdiace, puntoNuovo2, arcoLungo);
 
-            //TODO attenzione qui prima c'era arcoVecchio
-            //CancellaTriangolo(TriangAdiace, arcoLungo);
+
 
         }
-        //cancello il triangolo di partenza
 
+        //cancello il triangolo di partenza
         cout<<"Sto per cancellare: "<<triangolo.id<<"\t   e\t"<<arcoVecchio.id<<endl;
-        //TODO attenzione
         CancellaTriangolo(TriangAdiace, arcoLungo);
     }
 }
@@ -401,7 +410,7 @@ void Mesh::RaffinamentoStart(){
     InserisciTriangoli(newIdTriangle, arcoNuovo,arcoAdiacente.fine);
 
     //verifico se queste aggiunte hanno rovinato la mesh
-    Verifica(triangoloPartenza, arcoNuovo, puntoNuovo, arcoAdiacente);
+    Verifica(triangoloPartenza, puntoNuovo, arcoAdiacente);
 
     //cancello il triangolo di partenza
     //TODO attenzione
