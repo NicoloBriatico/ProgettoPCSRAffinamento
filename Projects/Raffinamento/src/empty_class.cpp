@@ -302,7 +302,8 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo,  ShapeLibrary::Vertice& n
     else{
         idTri = Trova(col, valore);
         cout<<"il triangolo "<<idTri<<" è adiacente a "<<col<<endl;
-
+        if (idTri == col)
+            return;
         //raffino il triangolo adiacente
         ShapeLibrary::Triangle TriangAdiace =id2object(idTri, triangoli);
 

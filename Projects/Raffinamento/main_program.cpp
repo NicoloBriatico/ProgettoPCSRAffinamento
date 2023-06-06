@@ -30,14 +30,15 @@ int main()
     /*    RICORDARE DI FARE I TEST PER OGNI CLASSE IMPLEMENTATA, E PER OGNI FUNZIONE DEFINITA   <-NOI SIAMO QUI ORA
 
 */
-    /*TODO,quando cerco l'arco potrei evitare di perdere tempo scorrendo tutta la lista, se verifico subito ch l'id dell
-     * 'arco è un id di bordo posso fermarmi subito senza perdere tempo
+    /*TODO, si può cancellare un oggetto?
+     * Parallelizzare il codice
+     *
      */
 
     //----------------------------------------------------
 
     //imposto una percentuale di triangoli da considerare
-    double theta = 0.3;
+    double theta = 0.9;
 
     //inizializzo i vettori che conterranno tutte gli oggetti di classe Vertice, Arco e Triangle
     vector<ShapeLibrary::Vertice> vertici;
@@ -83,9 +84,12 @@ int main()
     //raffino fino al raggiungimento della percentuale di raffinamento richiesta
     auto startRaffinamento= chrono::high_resolution_clock::now();
 
-    while(numTriPartenza>mesh.triangoli.size()*theta)
-        mesh.RaffinamentoStart();
 
+    while(numTriPartenza>mesh.triangoli.size()*theta){
+
+        mesh.RaffinamentoStart();
+        cout<<"percentuale di raffinamento: "<<numTriPartenza*100/(mesh.triangoli.size()*theta)<<"%"<<endl;
+    }
     auto endRaffinamento = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsedRaffinamento = endRaffinamento - startRaffinamento;
 
