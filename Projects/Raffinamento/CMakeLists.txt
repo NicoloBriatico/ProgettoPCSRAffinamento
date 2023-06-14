@@ -20,6 +20,10 @@ endif (WIN32)
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../externals/Main_Install/eigen3)
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../externals/Main_Install/googletest)
 
+# Aggiunta
+#set(SOURCES "" CACHE STRING "The sources list") # Variable which stores the cpp files
+
+
 ## Eigen3
 find_package(Eigen3 CONFIG REQUIRED)
 list(APPEND raffinamento_LINKED_LIBRARIES PUBLIC Eigen3::Eigen)
@@ -27,6 +31,10 @@ list(APPEND raffinamento_LINKED_LIBRARIES PUBLIC Eigen3::Eigen)
 ## Threads
 find_package(Threads REQUIRED)
 list(APPEND raffinamento_LINKED_LIBRARIES PRIVATE Threads::Threads)
+
+##OpenMPI AGGIUNTA
+find_package(MPI REQUIRED)
+list(APPEND raffinamento_LINKED_LIBRARIES PUBLIC MPI::MPI_CXX)
 
 ## GTest
 find_package(GTest REQUIRED)
@@ -43,6 +51,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
 list(APPEND raffinamento_SOURCES ${raffinamento_sources})
 list(APPEND raffinamento_HEADERS ${raffinamento_headers})
 list(APPEND raffinamento_INCLUDE ${raffinamento_includes})
+
 
 # Insert Tests
 ################################################################################
@@ -73,26 +82,17 @@ add_executable(raffinamento_program
 	${raffinamento_SOURCES}
     ${raffinamento_HEADERS})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test2/Cell0Ds.csv
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test1/Cell0Ds.csv
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test2/Cell1Ds.csv
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test1/Cell1Ds.csv
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test2/Cell2Ds.csv
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Dataset/Test1/Cell2Ds.csv
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-##CI SONO DUE FILE DA LEGGERE, MA HANNO GLI STESSI NOMI E SONO IN CARTELLE DIVERSE, DOBBIAMO CAPIRE COME FARE
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/raffinamento/Dataset/Test2/Cell0Ds.csv
-#      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/raffinamento/Dataset/Test2/Cell1Ds.csv
-#      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/raffinamento/Dataset/Test2/Cell2Ds.csv
-#      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
 target_link_libraries(raffinamento_program ${raffinamento_LINKED_LIBRARIES})
+
 target_include_directories(raffinamento_program PRIVATE ${raffinamento_INCLUDE})
 target_compile_options(raffinamento_program PUBLIC -fPIC)

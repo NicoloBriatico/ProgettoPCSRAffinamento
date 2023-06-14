@@ -1,6 +1,11 @@
 #ifndef __TOLLERANZA_H
 #define __TOLLERANZA_H
-
+/*
+ *
+ * CANCELLA
+ *
+ *
+ */
 #include "iostream"
 #include "list"
 
@@ -14,7 +19,7 @@ using namespace Eigen;
 using namespace ShapeLibrary;
 namespace TolleranzaLibrary
 {
-
+/*
 constexpr double max_tolerance(const double& x, const double& y){
     return x > y ? x : y;
 }
@@ -84,9 +89,9 @@ inline bool operator>(const Point& p1, const Point& p2){
 inline bool operator<=(const Point& p1, const Point& p2){
     return !(p1 > p2);
 }
-
+*/
 // ***************************************************************************
-
+/*
 template<typename T>
 vector<T> HeapSort(const vector<T>& v);
 
@@ -110,7 +115,7 @@ void InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& arco, S
 void Verifica(ShapeLibrary::Triangle& triangolo, ShapeLibrary::Vertice& nodoNuovo, ShapeLibrary::Arco& arcoVecchio);
 void RaffinamentoStart();
 void Esporta();
-
+*/
 }
 
 #endif // __TOLLERANZA_H

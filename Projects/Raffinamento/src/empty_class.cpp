@@ -12,7 +12,10 @@ Vertice::Vertice(const unsigned int& id,  const unsigned int& marker, const doub
 
 // ***************************************************************************
 
-Arco::Arco(const unsigned int& id,const unsigned int& marker, ShapeLibrary::Vertice& inizio,ShapeLibrary::Vertice& fine): id(id), marker(marker),inizio(inizio), fine(fine){}
+Arco::Arco(const unsigned int& id,const unsigned int& marker, ShapeLibrary::Vertice& inizio,ShapeLibrary::Vertice& fine): id(id), marker(marker),inizio(inizio), fine(fine){
+
+    lunghezza = sqrt((inizio.x-fine.x)*(inizio.x-fine.x)+(inizio.y-fine.y)*(inizio.y-fine.y));
+}
 
 void Arco::CalcolaLunghezza(){
     lunghezza = sqrt((inizio.x-fine.x)*(inizio.x-fine.x)+(inizio.y-fine.y)*(inizio.y-fine.y));
@@ -81,15 +84,19 @@ tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco>  Triangle::R
     //prendo gli archi e li ordino seleziando il più lungo
     vector<ShapeLibrary::Arco> arc ;
     //cout<<"\narchi e lunghezza: "<<endl;
+
+    //TODO si può parallelizzare(se ne vale la pena)
     for (unsigned int i = 0;i<3; i++)
     {
-        edges[i].CalcolaLunghezza();
+        //TODO AGGIUNTA VALUTA (FORSE È MEGLIO NON SCRIVERLA STA RIGA
+        //if (edges[i].lunghezza == 0)
+            edges[i].CalcolaLunghezza();
         //cout<<edges[i].id<<"\t"<<edges[i].lunghezza<<endl;
         arc.push_back(edges[i]);
     }
     arc = SortLibrary::HeapSort(arc, &ShapeLibrary::Arco::lunghezza);
 
-    cout<<"\nil lato più lungo: "<<arc[0].id<<endl;
+    //cout<<"\nil lato più lungo: "<<arc[0].id<<endl;
 
     //selezionato il lato più lungo mi calcolo il punto medio
     ShapeLibrary::Vertice punto = arc[0].CalcolaPuntoMedio(newIdVert);
@@ -106,8 +113,8 @@ tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco>  Triangle::R
 
     arco.fine = punto;
 
-    cout<<"punto aggiunto: "<<punto.id<<endl;
-    cout<<"Arco aggiunto: "<<arco.id<<"\t"<<arco.marker<<"\t"<<arco.inizio.id<<"\t"<<arco.fine.id<<endl;
+    //cout<<"punto aggiunto: "<<punto.id<<endl;
+    //cout<<"Arco aggiunto: "<<arco.id<<"\t"<<arco.marker<<"\t"<<arco.inizio.id<<"\t"<<arco.fine.id<<endl;
 
     tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco> aggiunti(arco, punto, arc[0]);
     return aggiunti;
@@ -124,6 +131,7 @@ void Mesh::CalcolaMatriceAdiacenza()
 
     Eigen::SparseMatrix<unsigned int> adj(numTri,numTri);
 
+    //TODO si può parallelizzare (se ha senso)
     //cerco le adiacenze frai vari triangoli
     for (unsigned int i= 0; i< numTri-1; i++)
     {
@@ -136,7 +144,6 @@ void Mesh::CalcolaMatriceAdiacenza()
 
 inline unsigned int Mesh::NuovoIdVertice()
 {
-    //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
     //vector<ShapeLibrary::Vertice> lista;
     //lista = vertici;
     //lista = SortLibrary::HeapSort(vertici, &ShapeLibrary::Vertice::id);
@@ -145,7 +152,6 @@ inline unsigned int Mesh::NuovoIdVertice()
 
 inline unsigned int Mesh::NuovoIdArco()
 {
-    //TODO se ordinassi prima di chiamare la prima volta la mesh non avrei bisogno di fare questa cosa di ordinare
     //vector<ShapeLibrary::Arco> lista;
     //lista = archi;
     //lista = SortLibrary::HeapSort(archi, &ShapeLibrary::Arco::id);
@@ -163,6 +169,7 @@ inline unsigned int Mesh::NuovoIdTriangolo()
 
 ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Vertice& nodo2)
 {
+    //TODO si può parallelizzare
     //cerco in tutta la lista quale arco è associato a questi nodi
     for(unsigned int i=0; i<archi.size();i++)
     {
@@ -184,8 +191,10 @@ ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Ve
     else if ((nodo2.marker == 1)||(nodo2.marker == 2)||(nodo2.marker == 3)||(nodo2.marker == 4))
         arco2.marker = nodo1.marker;
     //se uno dei due è interno
-    else if((nodo1.marker = 0)||(nodo2.marker = 0))
+    else if ((nodo1.marker = 0)||(nodo2.marker = 0))
             arco2.marker = 0;
+    else
+        arco2.marker = 0;
 
 
 
@@ -218,6 +227,7 @@ void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& a
     //aumento la dimensione della matrice di adiacenza
     adiacenza.conservativeResize(newIdTriangle + 1, newIdTriangle+1);
 
+    //TODO si può parallelizzare
     //aggiungo i triangoli vicini al nuovo triangolo
     for (unsigned int i = 1; i<triangoli.size(); i++)
         triangolo.isVicino(triangoli[i], adiacenza);
@@ -226,9 +236,10 @@ void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& a
 unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
 {
 
+    //TODO forse anche questo si può parallelizzare
     for (InnerIterator<SparseMatrix<unsigned int>> it(adiacenza, col); it; ++it) {
         if ((it.value()-1) == valore) {
-            cout<<"\nTriangolo Adiancente ha id: "<<it.row()<<endl;
+            //cout<<"\nTriangolo Adiancente ha id: "<<it.row()<<endl;
             return it.row() ;
         }
     }
@@ -238,32 +249,33 @@ unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
 }
 
 void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLibrary::Arco& arcoVecchio){
-    //TODO controllare
+    //TODO si può parallelizzare?
     //cancello l'arco in comune
     for (unsigned int i = 0; i<archi.size();i++)
     {
         if (archi[i].id == arcoVecchio.id)
         {
-            //TODO ATTENZIONE QUI, CONTROLLA BENE
             archi.erase(archi.begin()+i);
-            cout<<"Cancellato l'arco: "<<arcoVecchio.id<<endl;
+            //cout<<"Cancellato l'arco: "<<arcoVecchio.id<<endl;
             break;
         }
     }
 
+    //TODO si può parallelizzare?
     //cancello il triangolo che è stato raffinato
     for (unsigned int i = 0; i<triangoli.size();i++)
     {
         if (triangoli[i].id == triangoloPartenza.id)
         {
             triangoli.erase(triangoli.begin()+i);
-            cout<<"Cancellato il triangolo: "<<triangoloPartenza.id<<endl;
+            //cout<<"Cancellato il triangolo: "<<triangoloPartenza.id<<endl;
             break;
         }
     }
 
     //mi creo un matrice di appoggio,
     Eigen::SparseMatrix<unsigned int> adj(adiacenza.rows(),adiacenza.cols());
+    //TODO si può parallelizzare
     //ricreo la matrice di adiacenza saltando le righe e le colonne del triangolo che ho eliminato
     for(unsigned int i = 0; i<adiacenza.rows()-1;i++)
     {   if (i!=triangoloPartenza.id)
@@ -294,14 +306,13 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo,  ShapeLibrary::Vertice& n
 
     if (arcoVecchio.marker!=0)//(idTri == col)
     {
-        //TODO sicuro non serva fare niente altro?
         //se non ho vicini sono sul bordo e posso terminare il raffinamento
-        cout<<"sono sul bordo, raffinamento completato"<<endl;
+        //cout<<"sono sul bordo, raffinamento completato"<<endl;
     }
 
     else{
         idTri = Trova(col, valore);
-        cout<<"il triangolo "<<idTri<<" è adiacente a "<<col<<endl;
+        //cout<<"il triangolo "<<idTri<<" è adiacente a "<<col<<endl;
         if (idTri == col)
             return;
         //raffino il triangolo adiacente
@@ -318,7 +329,7 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo,  ShapeLibrary::Vertice& n
         //devo verificare se il punto nuovo medio calcolato coincide con quello che sto controllando oppure no
         if (arcoLungo.id ==arcoVecchio.id)
         {
-            cout<<"\nwe, ho già finito di raffinare"<<endl;
+            //cout<<"\nwe, ho già finito di raffinare"<<endl;
             arcoNuovo2.fine = nodoNuovo;
             archi.insert(archi.begin(),arcoNuovo2);
             //aggiungo i due triangoli che si sono formati
@@ -363,13 +374,14 @@ void Mesh::Verifica(ShapeLibrary::Triangle& triangolo,  ShapeLibrary::Vertice& n
         }
 
         //cancello il triangolo di partenza
-        cout<<"Sto per cancellare: "<<triangolo.id<<"\t   e\t"<<arcoVecchio.id<<endl;
+        //cout<<"Sto per cancellare: "<<triangolo.id<<"\t   e\t"<<arcoVecchio.id<<endl;
         CancellaTriangolo(TriangAdiace, arcoLungo);
     }
 }
 
 void Mesh::RaffinamentoStart(){
 
+    //TODO parallelizza
     //calcolo le aree dei triangoli
     for (unsigned int i=0; i<triangoli.size();i++)
         triangoli[i].CalcolaArea();
@@ -378,7 +390,7 @@ void Mesh::RaffinamentoStart(){
     triangoli = SortLibrary::HeapSort(triangoli, &ShapeLibrary::Triangle::area);
     ShapeLibrary::Triangle triangoloPartenza = triangoli[0];
 
-    cout<<"triangolo con area più grande:\n"<<triangoloPartenza.id<<"\t"<<triangoloPartenza.area<<endl;
+    //cout<<"triangolo con area più grande:\n"<<triangoloPartenza.id<<"\t"<<triangoloPartenza.area<<endl;
 
     //definisco i nuovi id per il punto e l'arco nuovo che si formerrano dopo il raffinamento
     unsigned int newIdEdges = NuovoIdArco();
@@ -390,7 +402,7 @@ void Mesh::RaffinamentoStart(){
     ShapeLibrary::Vertice puntoNuovo = get<1>(aggiunti);
     ShapeLibrary::Arco arcoAdiacente= get<2>(aggiunti);
 
-    cout<<"arco Nuovo: "<<arcoNuovo.id<<"\t"<<"punto Nuovo: "<<puntoNuovo.id<<endl;
+    //cout<<"arco Nuovo: "<<arcoNuovo.id<<"\t"<<"punto Nuovo: "<<puntoNuovo.id<<endl;
 
     //aggiungo il punto alla lista di punti e l'arco alla lista di archi
     archi.insert(archi.begin(),arcoNuovo);
@@ -408,7 +420,6 @@ void Mesh::RaffinamentoStart(){
     Verifica(triangoloPartenza, puntoNuovo, arcoAdiacente);
 
     //cancello il triangolo di partenza
-    //TODO attenzione
     CancellaTriangolo(triangoloPartenza, arcoAdiacente);
 }
 

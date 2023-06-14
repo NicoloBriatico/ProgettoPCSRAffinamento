@@ -11,6 +11,15 @@ using namespace std;
 
 namespace ShapeLibrary {
 
+
+constexpr double max_tolerance(const double& x, const double& y){
+    return x > y ? x : y;
+}
+
+inline double normSquared(const double& x, const double& y){
+    return x * x + y * y;
+}
+//************************************************************************
 //funzione per il passaggio da un id all'oggetto associato all'id
 template<typename T>
 T id2object(unsigned int& id, vector<T>& vertici)
@@ -35,12 +44,37 @@ public:
     double x;
     double y;
 
+    static constexpr double geometricTol = 1.0e-12;
+    static constexpr double geometricTol_Squared = max_tolerance(ShapeLibrary::Vertice::geometricTol * ShapeLibrary::Vertice::geometricTol,
+                                                                 numeric_limits<double>::epsilon());
 
     Vertice() = default;
     Vertice(const unsigned int& id,const unsigned int& marker,const double& x, const double& y );
 
 
 };
+
+
+inline bool operator==(const ShapeLibrary::Vertice& p1, const ShapeLibrary::Vertice& p2)
+{
+    return (normSquared(p1.x - p2.x, p1.y - p2.y) <=
+            ShapeLibrary::Vertice::geometricTol * ShapeLibrary::Vertice::geometricTol *
+            max(normSquared(p1.x, p1.y), normSquared(p2.x, p2.y)));
+}
+
+inline bool operator!=(const ShapeLibrary::Vertice& p1, const ShapeLibrary::Vertice& p2){
+    return !(p1 == p2);
+}
+
+inline bool operator>(const ShapeLibrary::Vertice& p1, const ShapeLibrary::Vertice& p2){
+    return p1.x > p2.x + ShapeLibrary::Vertice::geometricTol * max(p1.x, p2.x);
+}
+
+
+inline bool operator<=(const ShapeLibrary::Vertice& p1, const ShapeLibrary::Vertice& p2){
+    return !(p1 > p2);
+}
+
 
 //*************************************************************************
 
@@ -115,7 +149,6 @@ public:
     void Esporta();
 
 };
-//*************************************************************************
 }
 
 

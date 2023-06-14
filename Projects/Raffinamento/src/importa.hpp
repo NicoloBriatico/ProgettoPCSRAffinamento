@@ -28,7 +28,8 @@ bool ImportCell2Ds(vector<ShapeLibrary::Triangle>& lista, vector<ShapeLibrary::A
 
 bool ImportMesh(vector<ShapeLibrary::Vertice>& vertici,vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Triangle>& triangoli)
 {
-    //TODO FARE I TEST?
+    //TODO
+    //FARE I TEST PER CONTROLLARE LA COERENZA DEI DATI
     if(!ImportCell0Ds(vertici))
         return false;
 
@@ -37,6 +38,18 @@ bool ImportMesh(vector<ShapeLibrary::Vertice>& vertici,vector<ShapeLibrary::Arco
 
     if(!ImportCell2Ds(triangoli, archi, vertici))
         return false;
+    //TODO si può parallelizzare
+    //testo che le informazioni sui triangoli siano corrette
+    for (unsigned int i = 0;  i< triangoli.size();i++)
+    {
+        //ciclo su ogni triangolo e controllo che i vertici siano associati agli archi
+        for (unsigned int j= 0; j<3;j++)
+        {
+
+            if (((triangoli[i].vertices[j].id != triangoli[i].edges[j].inizio.id)||(triangoli[i].vertices[(j+1)%3].id != triangoli[i].edges[j].fine.id))&((triangoli[i].vertices[j].id != triangoli[i].edges[j].fine.id)&&(triangoli[i].vertices[(j+1)%3].id != triangoli[i].edges[j].inizio.id)))
+                cerr<<"errore di coerenza nei dati"<<endl;
+        }
+    }
 
     return true;
 
@@ -82,7 +95,6 @@ bool ImportCell0Ds(vector<ShapeLibrary::Vertice>& vertici)
         converter >>  nodo.id >> nodo.marker >> nodo.x >> nodo.y;
 
         //cout<<nodo.id <<"\t"<< nodo.marker <<"\t"<<nodo.x <<"\t"<<nodo.y<<endl;
-
         //lo aggiungo
         vertici.push_back(nodo);
 

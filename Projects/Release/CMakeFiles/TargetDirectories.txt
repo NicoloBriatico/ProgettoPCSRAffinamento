@@ -1,0 +1,8 @@
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/raffinamento_test.dir
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/raffinamento_program.dir
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/edit_cache.dir
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/rebuild_cache.dir
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/src/CMakeFiles/edit_cache.dir
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/src/CMakeFiles/rebuild_cache.dir
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/test/CMakeFiles/edit_cache.dir
+/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/test/CMakeFiles/rebuild_cache.dir

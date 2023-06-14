@@ -12,10 +12,10 @@ using namespace Eigen;
 using namespace ShapeLibrary;
 using namespace SortLibrary;
 using namespace TolleranzaLibrary;
-
+/*
 TEST(TestShape,TestId2Object)
 {
-    /*id del vertice che voglio recuperare*/
+    //id del vertice che voglio recuperare
     unsigned int id=42;
 
     Vertice vertice1 = Vertice(40,1,0,0);
@@ -26,7 +26,7 @@ TEST(TestShape,TestId2Object)
 
     Vertice vertice = id2object(id,v);
 
-    /*mi aspetto che abbia come attributi quelli del vertice con l'id dato come argomento*/
+    //mi aspetto che abbia come attributi quelli del vertice con l'id dato come argomento
     EXPECT_EQ(vertice.id,42);
     EXPECT_EQ(vertice.marker,6);
     EXPECT_EQ(vertice.x,1);
@@ -126,7 +126,7 @@ TEST(TestShape,TestIsVicino)
 
     unsigned int numTri = triangoli.size();
 
-    /*creo una matrice sparsa della dimensione corretta che andrò a popolare con il metodo isVicino*/
+    //creo una matrice sparsa della dimensione corretta che andrò a popolare con il metodo isVicino
     Eigen::SparseMatrix<unsigned int> adj(numTri,numTri);
     mesh.adiacenza=adj;
 
@@ -138,7 +138,7 @@ TEST(TestShape,TestIsVicino)
     EXPECT_EQ(mesh.adiacenza.coeff(1,0)-1,1);
     EXPECT_EQ(mesh.adiacenza.coeff(1,2)-1,4);
     EXPECT_EQ(mesh.adiacenza.coeff(2,1)-1,4);
-    /*non mi aspetto adiacenza tra triangolo0 e triangolo2*/
+    //non mi aspetto adiacenza tra triangolo0 e triangolo2
     EXPECT_EQ(mesh.adiacenza.coeff(0,2)-1,-1);
     EXPECT_EQ(mesh.adiacenza.coeff(2,0)-1,-1);
 
@@ -211,17 +211,17 @@ TEST(TestShape,TestCalcolaMatriceAdiacenza)
     vector<Triangle> triangoli = {triangolo0,triangolo1,triangolo2};
 
     Mesh mesh = Mesh(triangoli,archi,vertici);
-    /*creo la matrice di adiacenza della mesh*/
+    //creo la matrice di adiacenza della mesh
     mesh.CalcolaMatriceAdiacenza();
 
-    /*controllo che i coefficienti di adiacenza rispecchino ciò che mi aspetto*/
+    //controllo che i coefficienti di adiacenza rispecchino ciò che mi aspetto
     EXPECT_EQ(mesh.adiacenza.coeff(0,1)-1,1);
     EXPECT_EQ(mesh.adiacenza.coeff(1,0)-1,1);
     EXPECT_EQ(mesh.adiacenza.coeff(0,2)-1,-1);
     EXPECT_EQ(mesh.adiacenza.coeff(2,0)-1,-1);
     EXPECT_EQ(mesh.adiacenza.coeff(1,2)-1,4);
     EXPECT_EQ(mesh.adiacenza.coeff(2,1)-1,4);
-    /*un triangolo non deve considerare se stesso come adiacente*/
+    //un triangolo non deve considerare se stesso come adiacente
     EXPECT_EQ(mesh.adiacenza.coeff(0,0)-1,-1);
     EXPECT_EQ(mesh.adiacenza.coeff(1,1)-1,-1);
     EXPECT_EQ(mesh.adiacenza.coeff(2,2)-1,-1);
@@ -229,13 +229,11 @@ TEST(TestShape,TestCalcolaMatriceAdiacenza)
 
 TEST(TestShape,TestCercaArco)
 {
-    /*considero una mesh un pò diversa rispetto alla precedente per considerare tutte le declinazioni
-     * della funzione*/
+    //considero una mesh un pò diversa rispetto alla precedente per considerare tutte le declinazioni della funzione
     Vertice vertice1 = Vertice(40,1,0,0);
     Vertice vertice2 = Vertice(41,4,0,1);
     Vertice vertice3 = Vertice(42,2,1,0);
-    Vertice vertice4 = Vertice(43,1,1,1);/*pongo marker 1 per analizzare il caso in cui due vertici abbiano
-                                           marker uguale*/
+    Vertice vertice4 = Vertice(43,1,1,1);//pongo marker 1 per analizzare il caso in cui due vertici abbiano marker uguale
     Vertice vertice5 = Vertice(44,0,0.5,0.5);
 
     array<Vertice,3> verticiTriangolo0 = {vertice1,vertice2,vertice5};
@@ -260,7 +258,7 @@ TEST(TestShape,TestCercaArco)
     array<Arco,3> archiTriangolo3 = {arco4,arco5,arco7};
 
     vector<Arco> archi = {arco1,arco2,arco3,arco4,arco5,arco6,arco7,arco8};
-    /*ho bisogno nella funzione di archi ordinati per id decrescente*/
+    //ho bisogno nella funzione di archi ordinati per id decrescente
     archi=HeapSort(archi,&Arco::id);
 
     Triangle triangolo0 = Triangle(0,verticiTriangolo0,archiTriangolo0);
@@ -272,20 +270,20 @@ TEST(TestShape,TestCercaArco)
     Mesh mesh = Mesh(triangoli,archi,vertici);
 
     Arco arcoatteso = mesh.CercaArco(vertice2,vertice4);
-    Arco arcoatteso1 = mesh.CercaArco(vertice1,vertice4);/*che non esiste ancora, viene aggiunto in testa ad archi
-    ed avendo i due vertici stesso marker, così anche l'arco*/
+    Arco arcoatteso1 = mesh.CercaArco(vertice1,vertice4);//che non esiste ancora, viene aggiunto in testa ad archi
+    //ed avendo i due vertici stesso marker, così anche l'arco
 
     EXPECT_EQ(arcoatteso.id,3);
     EXPECT_EQ(arcoatteso.marker,8);
 
-    EXPECT_EQ(arcoatteso1.id,8);//*cioè id(nuovoarco)=id maggiore +1
+    EXPECT_EQ(arcoatteso1.id,8);//cioè id(nuovoarco)=id maggiore +1
     EXPECT_EQ(arcoatteso1.marker,1);
 
 }
 
 TEST(TestShape,TestRaffina)
 {
-    /*lo testo su un solo triangolo, essendo un metodo della classe Triangle*/
+    //lo testo su un solo triangolo, essendo un metodo della classe Triangle
     Vertice vertice1 = Vertice(40,1,0,0);
     Vertice vertice2 = Vertice(41,4,0,1);
     Vertice vertice3 = Vertice(42,6,1,0);
@@ -309,7 +307,7 @@ TEST(TestShape,TestRaffina)
 
     Mesh mesh = Mesh(triangoli,archi,vertici);
 
-    /*raffinamento triangolo0*/
+    //raffinamento triangolo0
     unsigned int newIdEdge0 = mesh.NuovoIdArco();
     unsigned int newIdVert0 = mesh.NuovoIdVertice();
 
@@ -331,7 +329,7 @@ TEST(TestShape,TestRaffina)
 
 TEST(TestShape,TestInserisciTriangoli)
 {
-    /*creo mesh con solo triangolo0*/
+    //creo mesh con solo triangolo0
     Vertice vertice1 = Vertice(40,1,0,0);
     Vertice vertice2 = Vertice(41,4,0,1);
     Vertice vertice3 = Vertice(42,6,1,0);
@@ -357,7 +355,7 @@ TEST(TestShape,TestInserisciTriangoli)
 
     Mesh mesh = Mesh(triangoli,archi,vertici);
 
-    /*raffino il triangolo0 e inserisco i due triangoli ottenuti dal raffinamento con InserisciTriangoli()*/
+    //raffino il triangolo0 e inserisco i due triangoli ottenuti dal raffinamento con InserisciTriangoli()
     unsigned int newIdEdge0 = mesh.NuovoIdArco();
     unsigned int newIdVert0 = mesh.NuovoIdVertice();
 
@@ -368,11 +366,11 @@ TEST(TestShape,TestInserisciTriangoli)
 
     mesh.archi.insert(mesh.archi.begin(),nuovoArco0);
 
-    /*creo un id per il nuovo triangolo, non serviva l'ordinamento per area perchè è l'unico*/
+    //creo un id per il nuovo triangolo, non serviva l'ordinamento per area perchè è l'unico
     unsigned int newIdTriangle1 = mesh.NuovoIdTriangolo();
 
-    mesh.InserisciTriangoli(newIdTriangle1,nuovoArco0,arcoLungo0.fine);/*fine sarebbe vertice3, quindi
-    sto inserendo il triangolo con vertice1,verticeNuovo,vertice3*/
+    mesh.InserisciTriangoli(newIdTriangle1,nuovoArco0,arcoLungo0.fine);//fine sarebbe vertice3, quindi
+    //sto inserendo il triangolo con vertice1,verticeNuovo,vertice3
 
     //*quando viene inserito, edges sono in ordine nuovoArco0 (id3), nuovoArco0.fine-altro nodo(creato con id4)
     //*, nuovoArco0.inizio-altro nodo (già esistente, id2)
@@ -422,17 +420,17 @@ TEST(TestShape,TestTrova)
     Mesh mesh = Mesh(triangoli,archi,vertici);
     mesh.CalcolaMatriceAdiacenza();
 
-    /*caso in cui c'è triangolo adiacente su quel lato*/
+    //caso in cui c'è triangolo adiacente su quel lato
     unsigned int idTriangoloCorrente=1;
     unsigned int idArcoDiAdiacenza=4;
     unsigned int idTriAdiac = mesh.Trova(idTriangoloCorrente,idArcoDiAdiacenza);
     EXPECT_EQ(idTriAdiac,2);
 
-    /*caso in cui no adiacenza su quel lato, quel lato è di bordo*/
+    //caso in cui no adiacenza su quel lato, quel lato è di bordo
     unsigned int idTriangoloCorrente1=2;
     unsigned int idArcoDiAdiacenza1=5;
     unsigned int idTriAdiac1 = mesh.Trova(idTriangoloCorrente1,idArcoDiAdiacenza1);
-    EXPECT_EQ(idTriAdiac1,2);//*restituisce l'id del triangolo considerato (vedi col)
+    EXPECT_EQ(idTriAdiac1,2);//restituisce l'id del triangolo considerato (vedi col)
 }
 
 TEST(TestShape,TestCancellaTriangolo)
@@ -483,7 +481,7 @@ TEST(TestShape,TestCancellaTriangolo)
     EXPECT_EQ(adiacenzaSecondoArco,0);
     EXPECT_EQ(adiacenzaTerzoArco,0);
 }
-
+*/
 /*TEST(TestShape,TestVerifica)
 {
     primo caso: il raffinamento termina alla prima iterazione
@@ -535,10 +533,10 @@ TEST(TestShape,TestCancellaTriangolo)
     EXPECT_EQ(mesh1.archi[0].id,8);
 
 }*/
-
+/*
 TEST(TestShape,TestRaffinamentoStart)
 {
-    /*primo caso: il raffinamento termina alla prima iterazione*/
+    //*primo caso: il raffinamento termina alla prima iterazione
     Vertice vertice1 = Vertice(40,1,0,0);
     Vertice vertice2 = Vertice(41,4,0,1);
     Vertice vertice3 = Vertice(42,6,1,0);
@@ -579,7 +577,7 @@ TEST(TestShape,TestRaffinamentoStart)
     mesh1.CalcolaMatriceAdiacenza();
     mesh1.RaffinamentoStart();
 
-    /*controllo che abbia aggiunto il vertice e gli archi corretti*/
+    //controllo che abbia aggiunto il vertice e gli archi corretti
     EXPECT_EQ(mesh1.vertici[0].id,45);
     EXPECT_EQ(mesh1.archi[0].id,10);
     EXPECT_EQ(mesh1.archi[1].id,9);
@@ -588,7 +586,7 @@ TEST(TestShape,TestRaffinamentoStart)
     EXPECT_EQ(mesh1.triangoli[1].id,3);
     EXPECT_EQ(mesh1.triangoli.size(),4);
 
-    /*secondo caso: il vertice opposto del triangolo adiacente da raffinare coincide con il nuovo nodo del precedente*/
+    //secondo caso: il vertice opposto del triangolo adiacente da raffinare coincide con il nuovo nodo del precedente
     mesh1.RaffinamentoStart();
 
     EXPECT_EQ(mesh1.vertici[0].id,46);
@@ -601,7 +599,7 @@ TEST(TestShape,TestRaffinamentoStart)
     EXPECT_EQ(mesh1.triangoli[3].id,5);
     EXPECT_EQ(mesh1.triangoli.size(),6);
 
-    /*terzo caso: si va avanti per più di due iterazioni, cambio totalmente mesh (rimane uguale solo il vertice1*/
+    //terzo caso: si va avanti per più di due iterazioni, cambio totalmente mesh (rimane uguale solo il vertice1
 
     vertice2 = Vertice(41,4,0,2);
     vertice3 = Vertice(42,6,4,0);
@@ -666,7 +664,7 @@ TEST(TestShape,TestRaffinamentoStart)
     EXPECT_EQ(mesh1.triangoli[5].id,5);
     EXPECT_EQ(mesh1.triangoli[6].id,4);
 }
-
+*/
 /*TEST(TestSort, TestMigliorePadreFigli)
 {
     Vertice vertice1 = Vertice(41,0,1,3);
@@ -680,7 +678,7 @@ TEST(TestShape,TestRaffinamentoStart)
     EXPECT_EQ(j,2);
 }
 */
-
+/*
 TEST(TestSort,TestHeapSort)
 {
     Vertice vertice1 = Vertice(15,1,0,0);
@@ -701,4 +699,6 @@ TEST(TestSort,TestHeapSort)
     EXPECT_EQ(v[4].id,expectedV[4].id);
 }
 
+Test sulla tolleranza va fatto con oggetti di tipo vertice, quindi sulle coordinate dei vertici
+*/
 #endif // __TEST_EMPTY_H

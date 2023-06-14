@@ -1,0 +1,17 @@
+The MPI test test_mpi for CXX in mode normal failed to compile with the following output:
+Change Dir: /home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/CMakeScratch/TryCompile-VRx0Vo
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_16bc3/fast && gmake[1]: Entering directory '/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/CMakeScratch/TryCompile-VRx0Vo'
+/usr/bin/gmake  -f CMakeFiles/cmTC_16bc3.dir/build.make CMakeFiles/cmTC_16bc3.dir/build
+gmake[2]: Entering directory '/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/CMakeScratch/TryCompile-VRx0Vo'
+Building CXX object CMakeFiles/cmTC_16bc3.dir/test_mpi.cpp.o
+/usr/bin/g++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -std=gnu++11 -o CMakeFiles/cmTC_16bc3.dir/test_mpi.cpp.o -c /home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/CMakeScratch/TryCompile-VRx0Vo/test_mpi.cpp
+Assembler messages:
+Fatal error: can't create CMakeFiles/cmTC_16bc3.dir/test_mpi.cpp.o: No such file or directory
+gmake[2]: *** [CMakeFiles/cmTC_16bc3.dir/build.make:78: CMakeFiles/cmTC_16bc3.dir/test_mpi.cpp.o] Error 1
+gmake[2]: Leaving directory '/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/CMakeScratch/TryCompile-VRx0Vo'
+gmake[1]: *** [Makefile:127: cmTC_16bc3/fast] Error 2
+gmake[1]: Leaving directory '/home/nicol-briatico/Scrivania/Progetto_PCS/Projects/Release/CMakeFiles/CMakeScratch/TryCompile-VRx0Vo'
+
+
+
