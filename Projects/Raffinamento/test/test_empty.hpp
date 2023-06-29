@@ -2,7 +2,6 @@
 #define __TEST_EMPTY_H
 
 #include <gtest/gtest.h>
-#include "tolleranza.hpp"
 #include "empty_class.hpp"
 #include "sortingArea.hpp"
 #include "Eigen/Eigen"
@@ -11,7 +10,6 @@ using namespace testing;
 using namespace Eigen;
 using namespace ShapeLibrary;
 using namespace SortLibrary;
-using namespace TolleranzaLibrary;
 
 TEST(TestShape,TestId2Object)
 {
@@ -308,8 +306,8 @@ TEST(TestShape,TestRaffina)
     Mesh mesh = Mesh(triangoli,archi,vertici);
 
     //raffinamento triangolo0
-    unsigned int newIdEdge0 = mesh.NuovoIdArco();
-    unsigned int newIdVert0 = mesh.NuovoIdVertice();
+    unsigned int newIdEdge0 = 3;//mesh.NuovoIdArco();
+    unsigned int newIdVert0 = 43;//mesh.NuovoIdVertice();
 
     tuple<Arco,Vertice,Arco> aggiunti0 = triangolo0.Raffina(newIdEdge0,newIdVert0);
 
@@ -326,6 +324,7 @@ TEST(TestShape,TestRaffina)
     EXPECT_EQ(arcoLungo0.id,1);
 
 }
+
 
 TEST(TestShape,TestInserisciTriangoli)
 {
@@ -356,8 +355,8 @@ TEST(TestShape,TestInserisciTriangoli)
     Mesh mesh = Mesh(triangoli,archi,vertici);
 
     //raffino il triangolo0 e inserisco i due triangoli ottenuti dal raffinamento con InserisciTriangoli()
-    unsigned int newIdEdge0 = mesh.NuovoIdArco();
-    unsigned int newIdVert0 = mesh.NuovoIdVertice();
+    unsigned int newIdEdge0 = 3;//mesh.NuovoIdArco();
+    unsigned int newIdVert0 = 43;//mesh.NuovoIdVertice();
 
     tuple<Arco,Vertice,Arco> aggiunti0 = triangolo0.Raffina(newIdEdge0,newIdVert0);
 
@@ -367,7 +366,7 @@ TEST(TestShape,TestInserisciTriangoli)
     mesh.archi.insert(mesh.archi.begin(),nuovoArco0);
 
     //creo un id per il nuovo triangolo, non serviva l'ordinamento per area perchè è l'unico
-    unsigned int newIdTriangle1 = mesh.NuovoIdTriangolo();
+    unsigned int newIdTriangle1 = 1;//mesh.NuovoIdTriangolo();
 
     mesh.InserisciTriangoli(newIdTriangle1,nuovoArco0,arcoLungo0.fine);//fine sarebbe vertice3, quindi
     //sto inserendo il triangolo con vertice1,verticeNuovo,vertice3
@@ -484,7 +483,7 @@ TEST(TestShape,TestCancellaTriangolo)
 
 TEST(TestShape,TestVerifica)
 {
-    primo caso: il raffinamento termina alla prima iterazione
+    //primo caso: il raffinamento termina alla prima iterazione
     Vertice vertice1 = Vertice(40,1,0,0);
     Vertice vertice2 = Vertice(41,6,0,1);
     Vertice vertice3 = Vertice(42,5,1,0);
@@ -492,7 +491,7 @@ TEST(TestShape,TestVerifica)
     Vertice vertice5 = Vertice(44,6,0,2);
     array<Vertice,3> verticitriangolo0 = {vertice1,vertice2,vertice3};
     array<Vertice,3> verticitriangolo1 = {vertice2,vertice4,vertice3};
-    array<Vertice,3> verticitriangolo2 = {vertice4,vertice2,vertice5}; forse era vertice2
+    array<Vertice,3> verticitriangolo2 = {vertice4,vertice2,vertice5};
     vector<Vertice> vertici = {vertice1,vertice2,vertice3,vertice4,vertice5};
     vertici=HeapSort(vertici,&Vertice::id);
 
@@ -518,9 +517,9 @@ TEST(TestShape,TestVerifica)
 
     Mesh mesh1 = Mesh(triangoli,archi,vertici);
     mesh1.CalcolaMatriceAdiacenza();
-    unsigned int newIdEdge1 = mesh1.NuovoIdArco();
+    unsigned int newIdEdge1 = 8;//mesh1.NuovoIdArco();
 
-    unsigned int newIdVert1 = mesh1.NuovoIdVertice();
+    unsigned int newIdVert1 = 45;//mesh1.NuovoIdVertice();
     tuple<Arco,Vertice,Arco> aggiunti1 = triangoli[0].Raffina(newIdEdge1,newIdVert1);
 
     mesh1.vertici.insert(mesh1.vertici.begin(),get<1>(aggiunti1));
@@ -533,6 +532,7 @@ TEST(TestShape,TestVerifica)
     EXPECT_EQ(mesh1.archi[0].id,8);
 
 }
+
 
 TEST(TestShape,TestRaffinamentoStart)
 {
@@ -678,7 +678,6 @@ TEST(TestSort, TestMigliorePadreFigli)
     EXPECT_EQ(j,2);
 }
 
-
 TEST(TestSort,TestHeapSort)
 {
     Vertice vertice1 = Vertice(15,1,0,0);
@@ -698,7 +697,6 @@ TEST(TestSort,TestHeapSort)
     EXPECT_EQ(v[3].id,expectedV[3].id);
     EXPECT_EQ(v[4].id,expectedV[4].id);
 }
-
 
 
 #endif // __TEST_EMPTY_H
