@@ -1,12 +1,5 @@
 #ifndef SORTINGAREA_HPP
 #define SORTINGAREA_HPP
-
-/*
- * nella scelta del sorting ci conviene implementarne uno che funziona bene tipo heapsorting o mergesorting (se non sbaglio), far funzionare tutto e quindi utilizzarlo come campione.
- * qualora avessimo tempo per farlo potremmo pensare di implementare un quicksorting, ovvero qualcosa di più veloce e meno accurato, runnare tutto e valutare la differenza di efficienza
- * a livello di velocità e di accuratezza come una sorta di errore rispetto allo heapsorting e quindi definire dei pro e dei contro
- */
-
 #include "iostream"
 #include "list"
 #include "Eigen/Eigen"
