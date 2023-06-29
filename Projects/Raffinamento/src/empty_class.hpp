@@ -12,13 +12,6 @@ using namespace std;
 namespace ShapeLibrary {
 
 
-constexpr double max_tolerance(const double& x, const double& y){
-    return x > y ? x : y;
-}
-
-inline double normSquared(const double& x, const double& y){
-    return x * x + y * y;
-}
 //************************************************************************
 //funzione per il passaggio da un id all'oggetto associato all'id
 template<typename T>
@@ -34,6 +27,14 @@ T id2object(unsigned int& id, vector<T>& vertici)
 }
 
 //*************************************************************************
+
+constexpr double max_tolerance(const double& x, const double& y){
+    return x > y ? x : y;
+}
+
+inline double normSquared(const double& x, const double& y){
+    return x * x + y * y;
+}
 
 class Vertice
 {
