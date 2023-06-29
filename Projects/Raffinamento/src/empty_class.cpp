@@ -85,7 +85,7 @@ tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco>  Triangle::R
     vector<ShapeLibrary::Arco> arc ;
     //cout<<"\narchi e lunghezza: "<<endl;
 
-    
+
     for (unsigned int i = 0;i<3; i++)
     {
         edges[i].CalcolaLunghezza();
@@ -130,10 +130,12 @@ void Mesh::CalcolaMatriceAdiacenza()
     Eigen::SparseMatrix<unsigned int> adj(numTri,numTri);
 
     //TODO si può parallelizzare
-    //cerco le adiacenze frai vari triangoli
+    //cerco le adiacenze fra i vari triangoli
+    #pragma omp for
     for (unsigned int i= 0; i< numTri-1; i++)
     {
         //seleziono un triangolo
+        #pragma omp for
         for (unsigned int j = i+1; j<numTri;j++)
             triangoli[i].isVicino(triangoli[j], adj);
     }
@@ -163,6 +165,7 @@ ShapeLibrary::Arco Mesh::CercaArco(ShapeLibrary::Vertice& nodo1,ShapeLibrary::Ve
 {
     //TODO si può parallelizzare
     //cerco in tutta la lista quale arco è associato a questi nodi
+    #pragma omp parallel for
     for(unsigned int i=0; i<archi.size();i++)
     {
         if ((archi[i].inizio.id == nodo1.id && archi[i].fine.id == nodo2.id)||(archi[i].inizio.id == nodo2.id && archi[i].fine.id == nodo1.id))
@@ -221,6 +224,7 @@ void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& a
 
     //TODO si può parallelizzare
     //aggiungo i triangoli vicini al nuovo triangolo
+    #pragma omp for
     for (unsigned int i = 1; i<triangoli.size(); i++)
         triangolo.isVicino(triangoli[i], adiacenza);
 }
@@ -228,7 +232,8 @@ void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& a
 unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
 {
 
-    //TODO si può parallelizzare
+    //TODO forse anche questo si può parallelizzare
+    #pragma omp parallel for
     for (InnerIterator<SparseMatrix<unsigned int>> it(adiacenza, col); it; ++it) {
         if ((it.value()-1) == valore) {
             //cout<<"\nTriangolo Adiancente ha id: "<<it.row()<<endl;
@@ -243,6 +248,7 @@ unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
 void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLibrary::Arco& arcoVecchio){
     //TODO si può parallelizzare
     //cancello l'arco in comune
+    #pragma omp for
     for (unsigned int i = 0; i<archi.size();i++)
     {
         if (archi[i].id == arcoVecchio.id)
@@ -255,6 +261,7 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
 
     //TODO si può parallelizzare
     //cancello il triangolo che è stato raffinato
+    #pragma omp for
     for (unsigned int i = 0; i<triangoli.size();i++)
     {
         if (triangoli[i].id == triangoloPartenza.id)
@@ -268,9 +275,12 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
     //aggiorno la matrice di adiacenza
     Eigen::SparseMatrix<unsigned int> adj(adiacenza.rows(),adiacenza.cols());
     //TODO si può parallelizzare
+    #pragma omp for
     for(unsigned int i = 0; i<adiacenza.rows()-1;i++)
     {   if (i!=triangoloPartenza.id)
-        {   for (unsigned int j = i+1; j<adiacenza.cols(); j++)
+        {
+            #pragma omp for
+            for (unsigned int j = i+1; j<adiacenza.cols(); j++)
             {   if (j!=triangoloPartenza.id){
                     if(adiacenza.coeffRef(i,j)!=0){
                         adj.insert(i, j) = adiacenza.coeffRef(i,j);
@@ -373,6 +383,7 @@ void Mesh::RaffinamentoStart(){
 
     //TODO parallelizza
     //calcolo le aree dei triangoli
+    #pragma omp for
     for (unsigned int i=0; i<triangoli.size();i++)
         triangoli[i].CalcolaArea();
 
