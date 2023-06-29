@@ -12,7 +12,7 @@ using namespace Eigen;
 using namespace ShapeLibrary;
 using namespace SortLibrary;
 using namespace TolleranzaLibrary;
-/*
+
 TEST(TestShape,TestId2Object)
 {
     //id del vertice che voglio recuperare
@@ -481,8 +481,8 @@ TEST(TestShape,TestCancellaTriangolo)
     EXPECT_EQ(adiacenzaSecondoArco,0);
     EXPECT_EQ(adiacenzaTerzoArco,0);
 }
-*/
-/*TEST(TestShape,TestVerifica)
+
+TEST(TestShape,TestVerifica)
 {
     primo caso: il raffinamento termina alla prima iterazione
     Vertice vertice1 = Vertice(40,1,0,0);
@@ -532,8 +532,8 @@ TEST(TestShape,TestCancellaTriangolo)
     EXPECT_EQ(mesh1.vertici[0].id,45);
     EXPECT_EQ(mesh1.archi[0].id,8);
 
-}*/
-/*
+}
+
 TEST(TestShape,TestRaffinamentoStart)
 {
     //*primo caso: il raffinamento termina alla prima iterazione
@@ -664,8 +664,8 @@ TEST(TestShape,TestRaffinamentoStart)
     EXPECT_EQ(mesh1.triangoli[5].id,5);
     EXPECT_EQ(mesh1.triangoli[6].id,4);
 }
-*/
-/*TEST(TestSort, TestMigliorePadreFigli)
+
+TEST(TestSort, TestMigliorePadreFigli)
 {
     Vertice vertice1 = Vertice(41,0,1,3);
     Vertice vertice2 = Vertice(43,0,2,1);
@@ -677,8 +677,8 @@ TEST(TestShape,TestRaffinamentoStart)
 
     EXPECT_EQ(j,2);
 }
-*/
-/*
+
+
 TEST(TestSort,TestHeapSort)
 {
     Vertice vertice1 = Vertice(15,1,0,0);
@@ -699,6 +699,6 @@ TEST(TestSort,TestHeapSort)
     EXPECT_EQ(v[4].id,expectedV[4].id);
 }
 
-Test sulla tolleranza va fatto con oggetti di tipo vertice, quindi sulle coordinate dei vertici
-*/
+
+
 #endif // __TEST_EMPTY_H
