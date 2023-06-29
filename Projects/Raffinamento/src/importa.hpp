@@ -28,8 +28,7 @@ bool ImportCell2Ds(vector<ShapeLibrary::Triangle>& lista, vector<ShapeLibrary::A
 
 bool ImportMesh(vector<ShapeLibrary::Vertice>& vertici,vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Triangle>& triangoli)
 {
-    //TODO
-    //FARE I TEST PER CONTROLLARE LA COERENZA DEI DATI
+
     if(!ImportCell0Ds(vertici))
         return false;
 
@@ -38,7 +37,7 @@ bool ImportMesh(vector<ShapeLibrary::Vertice>& vertici,vector<ShapeLibrary::Arco
 
     if(!ImportCell2Ds(triangoli, archi, vertici))
         return false;
-    //TODO si può parallelizzare
+
     //testo che le informazioni sui triangoli siano corrette
     for (unsigned int i = 0;  i< triangoli.size();i++)
     {
@@ -97,7 +96,6 @@ bool ImportCell0Ds(vector<ShapeLibrary::Vertice>& vertici)
         //cout<<nodo.id <<"\t"<< nodo.marker <<"\t"<<nodo.x <<"\t"<<nodo.y<<endl;
         //lo aggiungo
         vertici.push_back(nodo);
-        delete nodo;
 
     }
 
@@ -153,7 +151,7 @@ bool ImportCell1Ds(vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Vert
 
         //lo aggiungo
         archi.push_back(arco);
-        delete arco;
+
 
     }
 
@@ -219,7 +217,7 @@ bool ImportCell2Ds(vector<ShapeLibrary::Triangle>& triangoli,vector<ShapeLibrary
 
         //aggiungo il triangolo
         triangoli.push_back(triangolo);
-        delete triangolo;
+
 
     }
 
