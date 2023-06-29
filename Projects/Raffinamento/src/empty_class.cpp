@@ -85,12 +85,10 @@ tuple<ShapeLibrary::Arco,ShapeLibrary::Vertice, ShapeLibrary::Arco>  Triangle::R
     vector<ShapeLibrary::Arco> arc ;
     //cout<<"\narchi e lunghezza: "<<endl;
 
-    //TODO si può parallelizzare(se ne vale la pena)
+    
     for (unsigned int i = 0;i<3; i++)
     {
-        //TODO AGGIUNTA VALUTA (FORSE È MEGLIO NON SCRIVERLA STA RIGA
-        //if (edges[i].lunghezza == 0)
-            edges[i].CalcolaLunghezza();
+        edges[i].CalcolaLunghezza();
         //cout<<edges[i].id<<"\t"<<edges[i].lunghezza<<endl;
         arc.push_back(edges[i]);
     }
@@ -131,7 +129,7 @@ void Mesh::CalcolaMatriceAdiacenza()
 
     Eigen::SparseMatrix<unsigned int> adj(numTri,numTri);
 
-    //TODO si può parallelizzare (se ha senso)
+    //TODO si può parallelizzare
     //cerco le adiacenze frai vari triangoli
     for (unsigned int i= 0; i< numTri-1; i++)
     {
@@ -144,17 +142,11 @@ void Mesh::CalcolaMatriceAdiacenza()
 
 inline unsigned int Mesh::NuovoIdVertice()
 {
-    //vector<ShapeLibrary::Vertice> lista;
-    //lista = vertici;
-    //lista = SortLibrary::HeapSort(vertici, &ShapeLibrary::Vertice::id);
     return vertici[0].id +1;
 }
 
 inline unsigned int Mesh::NuovoIdArco()
 {
-    //vector<ShapeLibrary::Arco> lista;
-    //lista = archi;
-    //lista = SortLibrary::HeapSort(archi, &ShapeLibrary::Arco::id);
     return archi[0].id +1;
 }
 
@@ -236,7 +228,7 @@ void Mesh::InserisciTriangoli(unsigned int& newIdTriangle, ShapeLibrary::Arco& a
 unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
 {
 
-    //TODO forse anche questo si può parallelizzare
+    //TODO si può parallelizzare
     for (InnerIterator<SparseMatrix<unsigned int>> it(adiacenza, col); it; ++it) {
         if ((it.value()-1) == valore) {
             //cout<<"\nTriangolo Adiancente ha id: "<<it.row()<<endl;
@@ -249,7 +241,7 @@ unsigned int Mesh::Trova(unsigned int& col, unsigned int& valore)
 }
 
 void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLibrary::Arco& arcoVecchio){
-    //TODO si può parallelizzare?
+    //TODO si può parallelizzare
     //cancello l'arco in comune
     for (unsigned int i = 0; i<archi.size();i++)
     {
@@ -261,7 +253,7 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
         }
     }
 
-    //TODO si può parallelizzare?
+    //TODO si può parallelizzare
     //cancello il triangolo che è stato raffinato
     for (unsigned int i = 0; i<triangoli.size();i++)
     {
@@ -273,10 +265,9 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
         }
     }
 
-    //mi creo un matrice di appoggio,
+    //aggiorno la matrice di adiacenza
     Eigen::SparseMatrix<unsigned int> adj(adiacenza.rows(),adiacenza.cols());
     //TODO si può parallelizzare
-    //ricreo la matrice di adiacenza saltando le righe e le colonne del triangolo che ho eliminato
     for(unsigned int i = 0; i<adiacenza.rows()-1;i++)
     {   if (i!=triangoloPartenza.id)
         {   for (unsigned int j = i+1; j<adiacenza.cols(); j++)
@@ -290,7 +281,6 @@ void Mesh::CancellaTriangolo(ShapeLibrary::Triangle& triangoloPartenza, ShapeLib
         }
     }
 
-    //aggiorno la matrice di adiacenza
     adiacenza = adj;
 }
 
