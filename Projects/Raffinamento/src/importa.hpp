@@ -97,6 +97,7 @@ bool ImportCell0Ds(vector<ShapeLibrary::Vertice>& vertici)
         //cout<<nodo.id <<"\t"<< nodo.marker <<"\t"<<nodo.x <<"\t"<<nodo.y<<endl;
         //lo aggiungo
         vertici.push_back(nodo);
+        delete nodo;
 
     }
 
@@ -152,6 +153,7 @@ bool ImportCell1Ds(vector<ShapeLibrary::Arco>&  archi, vector<ShapeLibrary::Vert
 
         //lo aggiungo
         archi.push_back(arco);
+        delete arco;
 
     }
 
@@ -217,6 +219,7 @@ bool ImportCell2Ds(vector<ShapeLibrary::Triangle>& triangoli,vector<ShapeLibrary
 
         //aggiungo il triangolo
         triangoli.push_back(triangolo);
+        delete triangolo;
 
     }
 
