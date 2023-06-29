@@ -8,8 +8,6 @@
 
 //file contenente il codice per il sorting
 #include "sortingArea.hpp"
-//file contenente la definizione delle tolleranze
-#include "tolleranza.hpp"
 //file contente le funzioni per importare la mesh
 #include "importa.hpp"
 //file contente le classi
@@ -23,8 +21,8 @@ int main()
     //imposto una percentuale di triangoli da considerare
     double theta = 0.9;
 
+
     auto startProgram = chrono::high_resolution_clock::now();
-    
     //inizializzo i vettori che conterranno tutte gli oggetti di classe Vertice, Arco e Triangle
     vector<ShapeLibrary::Vertice> vertici;
     vector<ShapeLibrary::Arco> archi;
@@ -71,17 +69,22 @@ int main()
 
 
     while(numTriPartenza>mesh.triangoli.size()*theta){
+       // auto startRaffinamento= chrono::high_resolution_clock::now();
+
         mesh.RaffinamentoStart();
+
+        //auto endRaffinamento = chrono::high_resolution_clock::now();
+        //chrono::duration<double> elapsedRaffinamento = endRaffinamento - startRaffinamento;
+        //cout<<mesh.triangoli.size()<<"\t"<<elapsedRaffinamento.count()<<endl;
+
+        //cout<<"percentuale di raffinamento: "<<numTriPartenza*100/(mesh.triangoli.size()*theta)<<"%"<<endl;
     }
-    
     auto end1Raffinamento = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed1Raffinamento = end1Raffinamento - start1Raffinamento;
-    
+
     auto startExport= chrono::high_resolution_clock::now();
-    
     //esporto i nuovi dati
     mesh.Esporta();
-    
     auto endExport = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsedExport = endExport - startExport;
 
@@ -93,8 +96,9 @@ int main()
     cout<<"Tempo di Raffinamento: "<<elapsed1Raffinamento.count()<<" sec"<<endl;
     cout<<"Tempo di Raffinamento: "<<elapsedExport.count()<<" sec"<<endl;
     cout<<"Tempo di esecuzione totale: "<<elapsedProgram.count()<<"\t"<<mesh.triangoli.size()<<" sec"<<endl;
-    delete mesh;
-    
+    //cout<<mesh.triangoli.size()<<endl;
+
+
     return 0;
 
 }
