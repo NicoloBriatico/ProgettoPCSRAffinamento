@@ -3,7 +3,7 @@
 #include "sortingArea.hpp"
 #include <fstream>
 #include <sstream>
-
+#include <omp.h>
 using namespace std;
 
 namespace ShapeLibrary {
